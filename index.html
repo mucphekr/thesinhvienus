@@ -286,6 +286,12 @@
             color: #00274C;
         }
         
+        .doc-btn.active[data-doc="au"] {
+            border-color: #CC0000;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
+            color: #CC0000;
+        }
+        
         .file-upload {
             margin-bottom: 25px;
             padding: 25px;
@@ -545,6 +551,9 @@
                 <button class="doc-btn" data-doc="csu" onclick="selectDocument('csu')">
                     🔵 CSU Fullerton
                 </button>
+                <button class="doc-btn" data-doc="au" onclick="selectDocument('au')">
+                    🔴 American University
+                </button>
             </div>
         </div>
         
@@ -702,6 +711,16 @@
                     fontSize: 31,
                     positionX: 9.8,
                     positionY: 15.7
+                }
+            },
+            au: {
+                name: 'American University (Washington, DC)',
+                fileName: 'AU.jpg',
+                emailDomain: 'american.edu',
+                defaultSettings: {
+                    fontSize: 93.5,
+                    positionX: 10,
+                    positionY: 18.5
                 }
             }
         };
@@ -1083,4 +1102,5 @@
     </script>
 </body>
 </html>
+
 
