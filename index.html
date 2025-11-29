@@ -724,7 +724,7 @@
             </div>
         </div>
         
-        <div class="file-upload" id="fileUploadArea">
+        <div class="file-upload" id="fileUploadArea" style="display: none;">
             <label for="imageUpload">📁 <span id="uploadLabel">Chọn ảnh CORNELL UNI.jpg</span></label>
             <input type="file" id="imageUpload" accept="image/*">
             <p id="uploadStatus">⚠️ Vui lòng chọn file ảnh "<span id="expectedFile">CORNELL UNI.jpg</span>" từ thư mục của bạn</p>
@@ -780,7 +780,7 @@
                     </div>
                     <div class="autofill-info-item">
                         <div class="autofill-info-label">🌍 Quốc gia</div>
-                        <div class="autofill-info-value">United States</div>
+                        <div class="autofill-info-value" id="countryName">United States</div>
                     </div>
                     <div class="autofill-info-item">
                         <div class="autofill-info-label">📦 Script size</div>
@@ -928,6 +928,70 @@
             }
         };
         
+        // Auto-load image from server
+        function loadDocumentImage(docId) {
+            const doc = documents[docId];
+            const img = new Image();
+            
+            // Show loading state
+            canvas.width = 800;
+            canvas.height = 200;
+            ctx.fillStyle = '#f5f5f5';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#666';
+            ctx.font = '20px Georgia';
+            ctx.textAlign = 'center';
+            ctx.fillText('⏳ Đang tải ảnh ' + doc.fileName + '...', canvas.width / 2, canvas.height / 2);
+            
+            // Set timeout for loading (3 seconds)
+            const loadTimeout = setTimeout(function() {
+                console.warn('Image load timeout for:', doc.fileName);
+                showUploadFallback(doc);
+            }, 3000);
+            
+            img.onload = function() {
+                clearTimeout(loadTimeout);
+                originalImage = img;
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+                
+                // Hide file upload area since auto-load succeeded
+                document.getElementById('fileUploadArea').style.display = 'none';
+                showToast('Đã tải ảnh ' + doc.name);
+                
+                // Apply name if already entered
+                applyName();
+            };
+            
+            img.onerror = function() {
+                clearTimeout(loadTimeout);
+                console.error('Failed to load image:', doc.fileName);
+                console.info('💡 Nếu chạy local, hãy dùng Live Server hoặc upload lên GitHub Pages');
+                showUploadFallback(doc);
+            };
+            
+            // Load image from same directory (encode spaces in filename)
+            img.src = encodeURI(doc.fileName);
+        }
+        
+        function showUploadFallback(doc) {
+            // Show file upload section as fallback
+            document.getElementById('fileUploadArea').style.display = 'block';
+            document.getElementById('fileUploadArea').classList.remove('loaded');
+            document.getElementById('uploadStatus').innerHTML = '⚠️ Vui lòng upload file "<strong>' + doc.fileName + '</strong>" từ thư mục của bạn';
+            document.getElementById('uploadLabel').textContent = 'Chọn ảnh ' + doc.fileName;
+            
+            canvas.width = 800;
+            canvas.height = 200;
+            ctx.fillStyle = '#fff3cd';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#856404';
+            ctx.font = '18px Georgia';
+            ctx.textAlign = 'center';
+            ctx.fillText('👆 Vui lòng upload ảnh ' + doc.fileName + ' ở trên', canvas.width / 2, canvas.height / 2);
+        }
+        
         let currentDoc = 'cornell';
         
         // Select document
@@ -963,15 +1027,14 @@
             // Update email if name exists
             updatePreviewText();
             
-            // Reset image and apply name
-            originalImage = null;
-            showPlaceholder();
-            document.getElementById('fileUploadArea').classList.remove('loaded');
-            document.getElementById('uploadStatus').innerHTML = `⚠️ Vui lòng chọn file ảnh "<span id="expectedFile">${doc.fileName}</span>" từ thư mục của bạn`;
-            
             // Clear student name when switching documents
             document.getElementById('studentName').value = '';
             document.getElementById('infoCards').style.display = 'none';
+            document.getElementById('autofillSection').style.display = 'none';
+            currentBirthDate = null;
+            
+            // Auto-load the document image
+            loadDocumentImage(docId);
         }
         
         // Toggle collapsible sections
@@ -984,11 +1047,13 @@
         // Initialize
         window.onload = function() {
             setupEventListeners();
-            showPlaceholder();
             
             // Start with sections collapsed for cleaner UI
             document.getElementById('instructions').classList.add('hidden');
             document.querySelector('[onclick*="instructions"]').classList.add('collapsed');
+            
+            // Auto-load the first document image (Cornell)
+            loadDocumentImage('cornell');
         };
         
         function showPlaceholder() {
@@ -1000,7 +1065,7 @@
             ctx.fillStyle = '#999';
             ctx.font = '20px Georgia';
             ctx.textAlign = 'center';
-            ctx.fillText(`📷 Vui lòng upload ảnh ${doc.fileName}`, canvas.width / 2, canvas.height / 2);
+            ctx.fillText('📷 Đang tải ảnh ' + doc.fileName + '...', canvas.width / 2, canvas.height / 2);
         }
         
         function showStatus(message, isSuccess) {
@@ -1018,6 +1083,7 @@
         
         function setupEventListeners() {
             // File upload
+            // File upload (fallback when auto-load fails)
             document.getElementById('imageUpload').addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (file) {
@@ -1030,10 +1096,9 @@
                             canvas.height = img.height;
                             ctx.drawImage(img, 0, 0);
                             
-                            // Update UI
-                            document.getElementById('fileUploadArea').classList.add('loaded');
-                            document.getElementById('uploadStatus').innerHTML = '✅ Đã tải ảnh: <strong>' + file.name + '</strong> (' + img.width + 'x' + img.height + 'px)';
-                            showStatus('✅ Ảnh đã được tải thành công! Bây giờ hãy nhập tên sinh viên.', true);
+                            // Hide file upload area after successful upload
+                            document.getElementById('fileUploadArea').style.display = 'none';
+                            showToast('Đã tải ảnh: ' + file.name);
                             
                             // Apply name if already entered
                             applyName();
@@ -1129,6 +1194,10 @@
                 // Show info cards and autofill section
                 infoCards.style.display = 'grid';
                 document.getElementById('autofillSection').style.display = 'block';
+                
+                // Update country display based on selected document
+                const countryDisplay = documents[currentDoc].country || 'United States';
+                document.getElementById('countryName').textContent = countryDisplay;
                 
                 // Auto generate birth date
                 if (!currentBirthDate) {
@@ -1382,9 +1451,11 @@
             document.getElementById('birthDate').textContent = 
                 `${currentBirthDate.day}/${monthName}/${currentBirthDate.year}`;
             
+            const country = doc.country || 'United States';
+            
             generatedScript = `(async () => {
     const CONFIG = {
-        country: "United States",
+        country: "${country}",
         schoolName: "${doc.name}",
         firstName: "${firstName}",
         lastName: "${lastName}",
@@ -1445,20 +1516,21 @@
         await delay(CONFIG.delays.dropdownWait);
         
         const dropdownSels = ['[role="listbox"] [role="option"]', '[role="option"]', '.MuiAutocomplete-option', 'li[data-option-index]'];
+        const countryLower = CONFIG.country.toLowerCase();
         for (const sel of dropdownSels) {
             const opts = document.querySelectorAll(sel);
             for (const opt of opts) {
                 const text = opt.innerText?.toLowerCase() || '';
-                if (text.includes('united states') || text === 'united states of america') {
+                if (text.includes(countryLower) || text === countryLower) {
                     await delay(200);
                     opt.click();
-                    console.log("✅ Đã chọn United States");
+                    console.log("✅ Đã chọn " + CONFIG.country);
                     await delay(500);
                     return;
                 }
             }
         }
-        console.log("⚠️ Không tìm thấy option United States trong dropdown");
+        console.log("⚠️ Không tìm thấy option " + CONFIG.country + " trong dropdown");
     };
     
     const pasteSchool = async () => {
