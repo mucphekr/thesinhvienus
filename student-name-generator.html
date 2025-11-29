@@ -166,6 +166,14 @@
             margin-top: 20px;
         }
         
+        .top-controls {
+            margin-top: 0;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+            border-radius: 12px;
+        }
+        
         .settings-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -490,6 +498,110 @@
             background: #28a745;
         }
         
+        /* Autofill Script Section */
+        .autofill-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 12px;
+            border: 2px solid #4a4a6a;
+        }
+        
+        .autofill-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .autofill-header h3 {
+            color: #00d4ff;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+        
+        .autofill-header p {
+            color: #aaa;
+            font-size: 0.8rem;
+        }
+        
+        .autofill-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 600px) {
+            .autofill-info {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .autofill-info-item {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .autofill-info-label {
+            color: #888;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+        }
+        
+        .autofill-info-value {
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .autofill-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn-autofill {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: #1a1a2e;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+        
+        .btn-autofill:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 212, 255, 0.4);
+        }
+        
+        .btn-copy-script {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+        
+        .btn-copy-script:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(155, 89, 182, 0.4);
+        }
+        
+        .btn-copy-script.copied {
+            background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
+        }
+        
         @media (max-width: 600px) {
             .header h1 {
                 font-size: 1.8rem;
@@ -503,9 +615,70 @@
                 width: 100%;
             }
         }
+        
+        /* Toast Notification */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .toast {
+            background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            font-family: 'Libre Baskerville', Georgia, serif;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(120%);
+            animation: slideIn 0.4s ease forwards;
+            max-width: 350px;
+        }
+        
+        .toast.hiding {
+            animation: slideOut 0.4s ease forwards;
+        }
+        
+        .toast-icon {
+            font-size: 1.3rem;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+    
     <div class="header">
         <h1>🎓 University Admission Letter</h1>
         <p>Student Name Generator</p>
@@ -524,6 +697,12 @@
                     <li><strong>Bước 4:</strong> Nhấn "Download Image" để tải ảnh về</li>
                 </ol>
             </div>
+        </div>
+        
+        <!-- Quick Action Buttons - Moved to top -->
+        <div class="controls top-controls">
+            <button class="btn btn-secondary" onclick="downloadImage()">💾 Download Image</button>
+            <button class="btn btn-secondary" onclick="resetSettings()">↩️ Reset Settings</button>
         </div>
         
         <div class="document-selector">
@@ -584,6 +763,32 @@
                     <div class="info-label">📧 Email</div>
                     <div class="info-value" id="studentEmail">-</div>
                     <button class="btn-copy" onclick="copyToClipboard('studentEmail', this)">📋 Copy</button>
+                </div>
+            </div>
+            
+            <!-- Autofill Script Generator -->
+            <div class="autofill-section" id="autofillSection" style="display: none;">
+                <div class="autofill-header">
+                    <h3>🤖 Script Điền Form Tự Động</h3>
+                    <p>Tạo script để tự động điền form xác minh sinh viên</p>
+                </div>
+                <div class="autofill-info">
+                    <div class="autofill-info-item">
+                        <div class="autofill-info-label">🎂 Ngày sinh</div>
+                        <div class="autofill-info-value" id="birthDate">-</div>
+                    </div>
+                    <div class="autofill-info-item">
+                        <div class="autofill-info-label">🌍 Quốc gia</div>
+                        <div class="autofill-info-value">United States</div>
+                    </div>
+                    <div class="autofill-info-item">
+                        <div class="autofill-info-label">📦 Script size</div>
+                        <div class="autofill-info-value" id="scriptSize">-</div>
+                    </div>
+                </div>
+                <div class="autofill-controls">
+                    <button class="btn-autofill" onclick="generateAutofillScript()">⚡ Tạo Script</button>
+                    <button class="btn-copy-script" onclick="copyAutofillScript()">📋 Copy Script</button>
                 </div>
             </div>
         </div>
@@ -651,18 +856,32 @@
             <div class="canvas-wrapper">
                 <canvas id="imageCanvas" width="800" height="200"></canvas>
             </div>
-            
-            <div class="controls">
-                <button class="btn btn-secondary" onclick="downloadImage()">💾 Download Image</button>
-                <button class="btn btn-secondary" onclick="resetSettings()">↩️ Reset Settings</button>
-            </div>
         </div>
     </div>
     
     <script>
         let originalImage = null;
+        let generatedScript = '';
+        let currentBirthDate = null;
         const canvas = document.getElementById('imageCanvas');
         const ctx = canvas.getContext('2d');
+        
+        // Toast notification function
+        function showToast(message, duration = 2500) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<span class="toast-icon">✅</span><span>${message}</span>`;
+            container.appendChild(toast);
+            
+            // Auto remove after duration
+            setTimeout(() => {
+                toast.classList.add('hiding');
+                setTimeout(() => {
+                    toast.remove();
+                }, 400);
+            }, duration);
+        }
         
         // Document configurations
         const documents = {
@@ -905,11 +1124,21 @@
                 const email = emailLast ? `${emailFirst}.${emailLast}@${domain}` : `${emailFirst}@${domain}`;
                 document.getElementById('studentEmail').textContent = email;
                 
-                // Show info cards
+                // Show info cards and autofill section
                 infoCards.style.display = 'grid';
+                document.getElementById('autofillSection').style.display = 'block';
+                
+                // Auto generate birth date
+                if (!currentBirthDate) {
+                    currentBirthDate = generateRandomBirthDate();
+                    document.getElementById('birthDate').textContent = 
+                        `${currentBirthDate.day}/${getEnglishMonth(currentBirthDate.month)}/${currentBirthDate.year}`;
+                }
             } else {
                 previewText.textContent = 'Dear [Student Name],';
                 infoCards.style.display = 'none';
+                document.getElementById('autofillSection').style.display = 'none';
+                currentBirthDate = null;
             }
         }
         
@@ -1038,6 +1267,11 @@
                     applyName();
                     
                     showStatus(`✅ Generated: ${fullName}`, true);
+                    
+                    // Auto download image after generating name
+                    if (originalImage) {
+                        setTimeout(() => downloadImage(), 500);
+                    }
                 }
             } catch (error) {
                 console.error('API Error:', error);
@@ -1054,6 +1288,11 @@
                 applyName();
                 
                 showStatus(`✅ Generated (offline): ${fullName}`, true);
+                
+                // Auto download image after generating name
+                if (originalImage) {
+                    setTimeout(() => downloadImage(), 500);
+                }
             } finally {
                 btn.disabled = false;
                 btn.textContent = originalText;
@@ -1074,12 +1313,345 @@
             document.getElementById('positionYRange').value = doc.defaultSettings.positionY;
             document.getElementById('textStyle').value = 'bold';
             
+            currentBirthDate = null;
+            generatedScript = '';
+            
             updatePreviewText();
             
             if (originalImage) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(originalImage, 0, 0);
             }
+        }
+        
+        // ============ AUTOFILL SCRIPT GENERATOR ============
+        
+        function generateRandomBirthDate() {
+            const currentYear = new Date().getFullYear();
+            const minYear = currentYear - 25;
+            const maxYear = currentYear - 18;
+            
+            const year = Math.floor(Math.random() * (maxYear - minYear + 1)) + minYear;
+            const month = Math.floor(Math.random() * 12) + 1;
+            const maxDay = new Date(year, month, 0).getDate();
+            const day = Math.floor(Math.random() * maxDay) + 1;
+            
+            return { day, month, year };
+        }
+        
+        function getEnglishMonth(monthNumber) {
+            const months = {
+                1: "January", 2: "February", 3: "March", 4: "April",
+                5: "May", 6: "June", 7: "July", 8: "August",
+                9: "September", 10: "October", 11: "November", 12: "December"
+            };
+            return months[monthNumber] || "January";
+        }
+        
+        function generateAutofillScript() {
+            const name = document.getElementById('studentName').value.trim();
+            if (!name) {
+                alert('⚠️ Vui lòng nhập tên sinh viên trước!');
+                return;
+            }
+            
+            const nameParts = name.split(' ');
+            let firstName, lastName;
+            
+            if (nameParts.length === 1) {
+                firstName = nameParts[0];
+                lastName = '';
+            } else if (nameParts.length === 2) {
+                firstName = nameParts[0];
+                lastName = nameParts[1];
+            } else {
+                lastName = nameParts[nameParts.length - 1];
+                firstName = nameParts.slice(0, -1).join(' ');
+            }
+            
+            if (!currentBirthDate) {
+                currentBirthDate = generateRandomBirthDate();
+            }
+            
+            const doc = documents[currentDoc];
+            const email = document.getElementById('studentEmail').textContent;
+            const monthName = getEnglishMonth(currentBirthDate.month);
+            
+            document.getElementById('birthDate').textContent = 
+                `${currentBirthDate.day}/${monthName}/${currentBirthDate.year}`;
+            
+            generatedScript = `(async () => {
+    const CONFIG = {
+        country: "United States",
+        schoolName: "${doc.name}",
+        firstName: "${firstName}",
+        lastName: "${lastName}",
+        birthDay: "${currentBirthDate.day}",
+        birthMonth: "${monthName}",
+        birthYear: "${currentBirthDate.year}",
+        email: "${email}",
+        selectors: {
+            country: ['input[name*="country" i]', 'input[placeholder*="country" i]', '#sid-country', '[id*="country" i]'],
+            school: '#sid-college-name',
+            schoolMenu: '#sid-college-name-menu [role="option"]',
+            firstName: '#sid-first-name',
+            lastName: '#sid-last-name',
+            birthDayField: '#sid-birthdate-day',
+            birthMonthField: '#sid-birthdate__month',
+            birthMonthMenu: '#sid-birthdate__month-menu [role="option"]',
+            birthYearField: '#sid-birthdate-year',
+            email: '#sid-email'
+        },
+        delays: { default: 300, dropdownWait: 2500, schoolWait: 2000, monthWait: 500, typing: 150 }
+    };
+    
+    const delay = ms => new Promise(r => setTimeout(r, ms));
+    
+    const set = async (sel, val) => {
+        const el = document.querySelector(sel);
+        if (!el) return console.log("⚠️ Không tìm thấy: " + sel);
+        el.focus();
+        await delay(CONFIG.delays.typing);
+        el.click();
+        await delay(CONFIG.delays.typing);
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set.call(el, val);
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+        await delay(CONFIG.delays.typing);
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+        el.dispatchEvent(new Event("blur", { bubbles: true }));
+        await delay(CONFIG.delays.default);
+        console.log("✅ Đã điền: " + sel);
+    };
+    
+    const fillCountry = async () => {
+        console.log("🔍 Đang tìm trường Country...");
+        let el = null;
+        for (const sel of CONFIG.selectors.country) {
+            el = document.querySelector(sel);
+            if (el) break;
+        }
+        if (!el) return console.log("⚠️ Không tìm thấy Country");
+        
+        el.focus();
+        await delay(200);
+        el.click();
+        await delay(200);
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set.call(el, CONFIG.country);
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+        await delay(500);
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+        await delay(CONFIG.delays.dropdownWait);
+        
+        const dropdownSels = ['[role="listbox"] [role="option"]', '[role="option"]', '.MuiAutocomplete-option', 'li[data-option-index]'];
+        for (const sel of dropdownSels) {
+            const opts = document.querySelectorAll(sel);
+            for (const opt of opts) {
+                const text = opt.innerText?.toLowerCase() || '';
+                if (text.includes('united states') || text === 'united states of america') {
+                    await delay(200);
+                    opt.click();
+                    console.log("✅ Đã chọn United States");
+                    await delay(500);
+                    return;
+                }
+            }
+        }
+        console.log("⚠️ Không tìm thấy option United States trong dropdown");
+    };
+    
+    const pasteSchool = async () => {
+        console.log("🔍 Đang tìm trường School...");
+        const el = document.querySelector(CONFIG.selectors.school);
+        if (!el) return console.log("⚠️ Không tìm thấy School");
+        
+        el.focus();
+        await delay(200);
+        el.click();
+        await delay(200);
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, CONFIG.schoolName);
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        await delay(500);
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+        await delay(CONFIG.delays.schoolWait);
+        
+        const menuSels = [CONFIG.selectors.schoolMenu, '[role="option"]', '.MuiAutocomplete-option'];
+        for (const sel of menuSels) {
+            const opt = document.querySelector(sel);
+            if (opt) {
+                await delay(200);
+                opt.click();
+                console.log("✅ Đã chọn trường: " + CONFIG.schoolName);
+                await delay(500);
+                return;
+            }
+        }
+        console.log("⚠️ Không tìm thấy option trường trong dropdown");
+    };
+    
+    const selectMonth = async () => {
+        console.log("🔍 Đang chọn tháng sinh...");
+        const el = document.querySelector(CONFIG.selectors.birthMonthField);
+        if (!el) return console.log("⚠️ Không tìm thấy Month field");
+        
+        el.focus();
+        await delay(200);
+        el.click();
+        await delay(CONFIG.delays.monthWait);
+        el.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+        await delay(CONFIG.delays.monthWait);
+        
+        const menuSels = [CONFIG.selectors.birthMonthMenu, '[role="option"]', '.MuiMenuItem-root'];
+        for (const sel of menuSels) {
+            const opts = [...document.querySelectorAll(sel)];
+            const target = opts.find(o => {
+                const text = o.innerText?.toLowerCase() || '';
+                return text.includes(CONFIG.birthMonth.toLowerCase()) || text.startsWith(CONFIG.birthMonth.toLowerCase().substring(0,3));
+            });
+            if (target) {
+                await delay(200);
+                target.click();
+                console.log("✅ Đã chọn tháng: " + CONFIG.birthMonth);
+                await delay(400);
+                return;
+            }
+        }
+        console.log("⚠️ Không tìm thấy tháng: " + CONFIG.birthMonth);
+    };
+    
+    console.log("🚀 Bắt đầu điền form...");
+    console.log("⏳ Đang điền Country...");
+    await fillCountry();
+    await delay(500);
+    
+    console.log("⏳ Đang điền School...");
+    await pasteSchool();
+    await delay(500);
+    
+    console.log("⏳ Đang điền First Name...");
+    await set(CONFIG.selectors.firstName, CONFIG.firstName);
+    await delay(200);
+    
+    console.log("⏳ Đang điền Last Name...");
+    await set(CONFIG.selectors.lastName, CONFIG.lastName);
+    await delay(200);
+    
+    console.log("⏳ Đang chọn Month...");
+    await selectMonth();
+    await delay(200);
+    
+    console.log("⏳ Đang điền Day...");
+    await set(CONFIG.selectors.birthDayField, CONFIG.birthDay);
+    await delay(200);
+    
+    console.log("⏳ Đang điền Year...");
+    await set(CONFIG.selectors.birthYearField, CONFIG.birthYear);
+    await delay(200);
+    
+    console.log("⏳ Đang điền Email...");
+    await set(CONFIG.selectors.email, CONFIG.email);
+    await delay(500);
+    
+    console.log("═══════════════════════════════════");
+    console.log("✅ HOÀN THÀNH ĐIỀN FORM!");
+    console.log("═══════════════════════════════════");
+    console.log("👤 Họ tên: " + CONFIG.firstName + " " + CONFIG.lastName);
+    console.log("🎂 Ngày sinh: " + CONFIG.birthDay + "/" + CONFIG.birthMonth + "/" + CONFIG.birthYear);
+    console.log("📧 Email: " + CONFIG.email);
+    console.log("🏫 Trường: " + CONFIG.schoolName);
+    console.log("═══════════════════════════════════");
+    
+    await delay(800);
+    console.log("🔍 Đang tìm nút Verify...");
+    
+    // Tìm nút theo nhiều cách
+    let verifyBtn = null;
+    
+    // Cách 1: Tìm theo text chính xác
+    const allBtns = [...document.querySelectorAll('button, [role="button"], input[type="submit"]')];
+    for (const btn of allBtns) {
+        const text = (btn.innerText || btn.textContent || btn.value || '').toLowerCase().trim();
+        if (text.includes('verify student status') || 
+            text.includes('verify my student') ||
+            text === 'verify' ||
+            text.includes('xác minh')) {
+            verifyBtn = btn;
+            console.log("✅ Tìm thấy nút: " + text);
+            break;
+        }
+    }
+    
+    // Cách 2: Tìm nút submit cuối cùng trong form
+    if (!verifyBtn) {
+        const forms = document.querySelectorAll('form');
+        for (const form of forms) {
+            const submitBtn = form.querySelector('button[type="submit"], button:last-of-type');
+            if (submitBtn) {
+                verifyBtn = submitBtn;
+                console.log("✅ Tìm thấy nút submit trong form");
+                break;
+            }
+        }
+    }
+    
+    // Cách 3: Tìm nút có màu xanh/primary
+    if (!verifyBtn) {
+        const colorBtns = document.querySelectorAll('button[class*="primary"], button[class*="submit"], button[class*="blue"]');
+        if (colorBtns.length > 0) {
+            verifyBtn = colorBtns[colorBtns.length - 1];
+            console.log("✅ Tìm thấy nút primary/submit");
+        }
+    }
+    
+    if (verifyBtn) {
+        verifyBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        await delay(500);
+        console.log("📍 Nút vị trí: ", verifyBtn.getBoundingClientRect());
+        
+        if (!verifyBtn.disabled && !verifyBtn.getAttribute('disabled')) {
+            verifyBtn.focus();
+            await delay(200);
+            verifyBtn.click();
+            console.log("✅ Đã click nút xác minh!");
+        } else {
+            console.log("⚠️ Nút bị disabled, vui lòng kiểm tra lại form");
+            console.log("💡 Thử click thủ công nút 'Verify student status'");
+        }
+    } else {
+        console.log("⚠️ Không tìm thấy nút Verify");
+        console.log("💡 Vui lòng click thủ công nút 'Verify student status'");
+    }
+})();`;
+            
+            document.getElementById('scriptSize').textContent = 
+                (new Blob([generatedScript]).size / 1024).toFixed(2) + ' KB';
+            
+            showToast('Đã tạo Script thành công!');
+        }
+        
+        function copyAutofillScript() {
+            if (!generatedScript) {
+                alert('⚠️ Vui lòng click "Tạo Script" trước!');
+                return;
+            }
+            
+            navigator.clipboard.writeText(generatedScript).then(() => {
+                const btn = document.querySelector('.btn-copy-script');
+                btn.textContent = '✅ Đã Copy!';
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.textContent = '📋 Copy Script';
+                    btn.classList.remove('copied');
+                }, 2000);
+            }).catch(() => {
+                const textArea = document.createElement('textarea');
+                textArea.value = generatedScript;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast('Script đã copy!');
+            });
         }
     </script>
 </body>
