@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>University Admission Letter Generator</title>
-    <meta name="description" content="Generate personalized university admission letters with student names">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
         
@@ -692,9 +691,9 @@
             </button>
             <div class="collapsible-content" id="instructions">
                 <ol>
-                    <li><strong>Bước 1:</strong> Chọn trường đại học</li>
-                    <li><strong>Bước 2:</strong> Upload ảnh thư chấp nhận tương ứng</li>
-                    <li><strong>Bước 3:</strong> Nhập họ tên sinh viên hoặc click Random</li>
+                    <li><strong>Bước 1:</strong> Click "📁 Chọn ảnh CORNELL UNI.jpg" và chọn file ảnh</li>
+                    <li><strong>Bước 2:</strong> Nhập họ tên sinh viên vào ô bên dưới</li>
+                    <li><strong>Bước 3:</strong> Tùy chỉnh font chữ, kích thước, màu sắc và vị trí</li>
                     <li><strong>Bước 4:</strong> Nhấn "Download Image" để tải ảnh về</li>
                 </ol>
             </div>
@@ -933,6 +932,9 @@
             const doc = documents[docId];
             const img = new Image();
             
+            // Enable CORS for the image to allow canvas export
+            img.crossOrigin = 'anonymous';
+            
             // Show loading state
             canvas.width = 800;
             canvas.height = 200;
@@ -968,10 +970,34 @@
                 clearTimeout(loadTimeout);
                 console.error('Failed to load image:', doc.fileName);
                 console.info('💡 Nếu chạy local, hãy dùng Live Server hoặc upload lên GitHub Pages');
-                showUploadFallback(doc);
+                // Try loading without CORS (for local development)
+                loadImageWithoutCORS(docId);
             };
             
             // Load image from same directory (encode spaces in filename)
+            img.src = encodeURI(doc.fileName);
+        }
+        
+        // Fallback: Load image without CORS for local development
+        function loadImageWithoutCORS(docId) {
+            const doc = documents[docId];
+            const img = new Image();
+            
+            img.onload = function() {
+                originalImage = img;
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+                
+                document.getElementById('fileUploadArea').style.display = 'none';
+                showToast('Đã tải ảnh ' + doc.name + ' (local mode)');
+                applyName();
+            };
+            
+            img.onerror = function() {
+                showUploadFallback(doc);
+            };
+            
             img.src = encodeURI(doc.fileName);
         }
         
@@ -1082,7 +1108,6 @@
         }
         
         function setupEventListeners() {
-            // File upload
             // File upload (fallback when auto-load fails)
             document.getElementById('imageUpload').addEventListener('change', function(e) {
                 const file = e.target.files[0];
@@ -1309,12 +1334,19 @@
             const universityName = documents[currentDoc].name.replace(/\s+/g, '_');
             const fileName = `${universityName}_${safeName}.png`;
             
-            const link = document.createElement('a');
-            link.download = fileName;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-            
-            showStatus('✅ Đã tải ảnh: ' + fileName, true);
+            try {
+                const link = document.createElement('a');
+                link.download = fileName;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                showStatus('✅ Đã tải ảnh: ' + fileName, true);
+            } catch (e) {
+                console.error('Download error:', e);
+                // Canvas tainted - need to reload image with manual upload
+                alert('⚠️ Không thể tải ảnh do lỗi bảo mật.\n\n💡 Giải pháp: Vui lòng upload lại ảnh bằng nút "Chọn ảnh" ở trên.');
+                showUploadFallback(documents[currentDoc]);
+            }
         }
         
         async function generateRandomName() {
@@ -1339,9 +1371,18 @@
                     
                     showStatus(`✅ Generated: ${fullName}`, true);
                     
+                    // Auto generate script after generating name
+                    generateAutofillScript();
+                    
                     // Auto download image after generating name
                     if (originalImage) {
-                        setTimeout(() => downloadImage(), 500);
+                        setTimeout(() => {
+                            try {
+                                downloadImage();
+                            } catch (e) {
+                                console.error('Auto download failed:', e);
+                            }
+                        }, 500);
                     }
                 }
             } catch (error) {
@@ -1360,9 +1401,18 @@
                 
                 showStatus(`✅ Generated (offline): ${fullName}`, true);
                 
+                // Auto generate script after generating name
+                generateAutofillScript();
+                
                 // Auto download image after generating name
                 if (originalImage) {
-                    setTimeout(() => downloadImage(), 500);
+                    setTimeout(() => {
+                        try {
+                            downloadImage();
+                        } catch (e) {
+                            console.error('Auto download failed:', e);
+                        }
+                    }, 500);
                 }
             } finally {
                 btn.disabled = false;
@@ -1463,7 +1513,10 @@
         birthMonth: "${monthName}",
         birthYear: "${currentBirthDate.year}",
         email: "${email}",
+        targetLanguage: "English (UK)",
         selectors: {
+            languageInput: '#changeLanguageSelector-input',
+            languageMenu: '#changeLanguageSelector-menu [role="option"]',
             country: ['input[name*="country" i]', 'input[placeholder*="country" i]', '#sid-country', '[id*="country" i]'],
             school: '#sid-college-name',
             schoolMenu: '#sid-college-name-menu [role="option"]',
@@ -1475,7 +1528,7 @@
             birthYearField: '#sid-birthdate-year',
             email: '#sid-email'
         },
-        delays: { default: 300, dropdownWait: 2500, schoolWait: 2000, monthWait: 500, typing: 150 }
+        delays: { default: 300, dropdownWait: 2500, schoolWait: 2000, monthWait: 500, typing: 150, languageWait: 2000 }
     };
     
     const delay = ms => new Promise(r => setTimeout(r, ms));
@@ -1494,6 +1547,48 @@
         el.dispatchEvent(new Event("blur", { bubbles: true }));
         await delay(CONFIG.delays.default);
         console.log("✅ Đã điền: " + sel);
+    };
+    
+    const changeLanguage = async () => {
+        console.log("🌐 Đang thay đổi ngôn ngữ sang English (UK)...");
+        const langInput = document.querySelector(CONFIG.selectors.languageInput);
+        if (!langInput) {
+            console.log("⚠️ Không tìm thấy Language selector");
+            return false;
+        }
+        
+        // Kiểm tra nếu đã là English (UK) thì bỏ qua
+        if (langInput.value === CONFIG.targetLanguage) {
+            console.log("✅ Ngôn ngữ đã là English (UK)");
+            return true;
+        }
+        
+        // Click vào language selector để mở dropdown
+        langInput.focus();
+        await delay(200);
+        langInput.click();
+        await delay(500);
+        
+        // Tìm và click vào option English (UK)
+        const menuSels = [CONFIG.selectors.languageMenu, '[role="option"]', '.MuiMenuItem-root', 'li[role="option"]'];
+        for (const sel of menuSels) {
+            const opts = [...document.querySelectorAll(sel)];
+            const target = opts.find(o => {
+                const text = o.innerText?.trim() || o.textContent?.trim() || '';
+                return text === CONFIG.targetLanguage || text.includes('English (UK)');
+            });
+            if (target) {
+                await delay(200);
+                target.click();
+                console.log("✅ Đã chọn ngôn ngữ: " + CONFIG.targetLanguage);
+                console.log("⏳ Đang chờ trang cập nhật ngôn ngữ...");
+                await delay(CONFIG.delays.languageWait);
+                return true;
+            }
+        }
+        
+        console.log("⚠️ Không tìm thấy option English (UK) trong dropdown");
+        return false;
     };
     
     const fillCountry = async () => {
@@ -1593,35 +1688,40 @@
     };
     
     console.log("🚀 Bắt đầu điền form...");
-    console.log("⏳ Đang điền Country...");
+    
+    console.log("🌐 Bước 1: Thay đổi ngôn ngữ...");
+    await changeLanguage();
+    await delay(500);
+    
+    console.log("⏳ Bước 2: Đang điền Country...");
     await fillCountry();
     await delay(500);
     
-    console.log("⏳ Đang điền School...");
+    console.log("⏳ Bước 3: Đang điền School...");
     await pasteSchool();
     await delay(500);
     
-    console.log("⏳ Đang điền First Name...");
+    console.log("⏳ Bước 4: Đang điền First Name...");
     await set(CONFIG.selectors.firstName, CONFIG.firstName);
     await delay(200);
     
-    console.log("⏳ Đang điền Last Name...");
+    console.log("⏳ Bước 5: Đang điền Last Name...");
     await set(CONFIG.selectors.lastName, CONFIG.lastName);
     await delay(200);
     
-    console.log("⏳ Đang chọn Month...");
+    console.log("⏳ Bước 6: Đang chọn Month...");
     await selectMonth();
     await delay(200);
     
-    console.log("⏳ Đang điền Day...");
+    console.log("⏳ Bước 7: Đang điền Day...");
     await set(CONFIG.selectors.birthDayField, CONFIG.birthDay);
     await delay(200);
     
-    console.log("⏳ Đang điền Year...");
+    console.log("⏳ Bước 8: Đang điền Year...");
     await set(CONFIG.selectors.birthYearField, CONFIG.birthYear);
     await delay(200);
     
-    console.log("⏳ Đang điền Email...");
+    console.log("⏳ Bước 9: Đang điền Email...");
     await set(CONFIG.selectors.email, CONFIG.email);
     await delay(500);
     
