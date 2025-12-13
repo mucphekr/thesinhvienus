@@ -299,6 +299,12 @@
             color: #CC0000;
         }
         
+        .doc-btn.active[data-doc="columbia"] {
+            border-color: #1E4D8C;
+            background: linear-gradient(135deg, #e6f0ff 0%, #cce0ff 100%);
+            color: #1E4D8C;
+        }
+        
         .file-upload {
             margin-bottom: 25px;
             padding: 25px;
@@ -720,6 +726,9 @@
                 <button class="doc-btn" data-doc="au" onclick="selectDocument('au')">
                     🔴 American University
                 </button>
+                <button class="doc-btn" data-doc="columbia" onclick="selectDocument('columbia')">
+                    🔵 Columbia University
+                </button>
             </div>
         </div>
         
@@ -849,6 +858,36 @@
                     </select>
                 </div>
             </div>
+            
+            <!-- Birth Date Position Settings (for Columbia) -->
+            <div id="birthDateSettings" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 2px dashed #ddd;">
+                <h4 style="color: #1E4D8C; margin-bottom: 15px;">📅 Cài đặt vị trí Ngày sinh (Columbia)</h4>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label for="birthDateFontSize">Birth Date Font Size (px)</label>
+                        <div class="input-row">
+                            <input type="range" id="birthDateFontSizeRange" min="10" max="150" step="0.5" value="70">
+                            <input type="number" id="birthDateFontSize" min="10" max="200" step="0.1" value="70">
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label for="birthDateX">Birth Date X (%)</label>
+                        <div class="input-row">
+                            <input type="range" id="birthDateXRange" min="0" max="100" step="0.1" value="10">
+                            <input type="number" id="birthDateX" min="0" max="100" step="0.1" value="10">
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label for="birthDateY">Birth Date Y (%)</label>
+                        <div class="input-row">
+                            <input type="range" id="birthDateYRange" min="0" max="100" step="0.1" value="30">
+                            <input type="number" id="birthDateY" min="0" max="100" step="0.1" value="30">
+                        </div>
+                    </div>
+                </div>
+            </div>
             </div>
         </div>
         
@@ -923,6 +962,22 @@
                     fontSize: 93.5,
                     positionX: 10,
                     positionY: 18.5
+                }
+            },
+            columbia: {
+                name: 'Columbia University (New York, NY)',
+                fileName: 'COLUMBIA.jpg',
+                emailDomain: 'columbia.edu',
+                noDearPrefix: true,  // Không thêm "Dear" trước tên
+                showBirthDate: true, // Hiển thị ngày sinh trên ảnh
+                defaultSettings: {
+                    fontSize: 137,
+                    positionX: 6.5,
+                    positionY: 23.3,
+                    // Vị trí ngày sinh
+                    birthDateFontSize: 128,
+                    birthDateX: 24,
+                    birthDateY: 27.4
                 }
             }
         };
@@ -1046,6 +1101,21 @@
             document.getElementById('positionY').value = doc.defaultSettings.positionY;
             document.getElementById('positionYRange').value = doc.defaultSettings.positionY;
             document.getElementById('textStyle').value = 'bold';
+            
+            // Show/hide birth date settings for Columbia
+            const birthDateSettings = document.getElementById('birthDateSettings');
+            if (doc.showBirthDate) {
+                birthDateSettings.style.display = 'block';
+                // Set birth date position defaults
+                document.getElementById('birthDateFontSize').value = doc.defaultSettings.birthDateFontSize || 40;
+                document.getElementById('birthDateFontSizeRange').value = doc.defaultSettings.birthDateFontSize || 40;
+                document.getElementById('birthDateX').value = doc.defaultSettings.birthDateX || 10;
+                document.getElementById('birthDateXRange').value = doc.defaultSettings.birthDateX || 10;
+                document.getElementById('birthDateY').value = doc.defaultSettings.birthDateY || 30;
+                document.getElementById('birthDateYRange').value = doc.defaultSettings.birthDateY || 30;
+            } else {
+                birthDateSettings.style.display = 'none';
+            }
             
             // Update school name in info cards
             document.getElementById('schoolName').textContent = doc.name;
@@ -1176,15 +1246,49 @@
                 document.getElementById(id).addEventListener('change', applyName);
                 document.getElementById(id).addEventListener('input', applyName);
             });
+            
+            // Birth Date Position controls (for Columbia)
+            document.getElementById('birthDateFontSizeRange').addEventListener('input', function() {
+                document.getElementById('birthDateFontSize').value = this.value;
+                applyName();
+            });
+            document.getElementById('birthDateFontSize').addEventListener('input', function() {
+                document.getElementById('birthDateFontSizeRange').value = this.value;
+                applyName();
+            });
+            
+            document.getElementById('birthDateXRange').addEventListener('input', function() {
+                document.getElementById('birthDateX').value = this.value;
+                applyName();
+            });
+            document.getElementById('birthDateX').addEventListener('input', function() {
+                document.getElementById('birthDateXRange').value = this.value;
+                applyName();
+            });
+            
+            document.getElementById('birthDateYRange').addEventListener('input', function() {
+                document.getElementById('birthDateY').value = this.value;
+                applyName();
+            });
+            document.getElementById('birthDateY').addEventListener('input', function() {
+                document.getElementById('birthDateYRange').value = this.value;
+                applyName();
+            });
         }
         
         function updatePreviewText() {
             const name = document.getElementById('studentName').value.trim();
             const previewText = document.getElementById('previewText');
             const infoCards = document.getElementById('infoCards');
+            const doc = documents[currentDoc];
             
             if (name) {
-                previewText.textContent = `Dear ${name},`;
+                // Update preview text based on document type
+                if (doc.noDearPrefix) {
+                    previewText.textContent = name; // Columbia: không có "Dear"
+                } else {
+                    previewText.textContent = `Dear ${name},`;
+                }
                 
                 // Parse name into first and last
                 const nameParts = name.split(' ');
@@ -1229,6 +1333,11 @@
                     currentBirthDate = generateRandomBirthDate();
                     document.getElementById('birthDate').textContent = 
                         `${currentBirthDate.day}/${getEnglishMonth(currentBirthDate.month)}/${currentBirthDate.year}`;
+                    
+                    // Redraw if Columbia (to show birth date on canvas)
+                    if (doc.showBirthDate) {
+                        applyName();
+                    }
                 }
             } else {
                 previewText.textContent = 'Dear [Student Name],';
@@ -1280,6 +1389,7 @@
             }
             
             const name = document.getElementById('studentName').value.trim();
+            const doc = documents[currentDoc];
             
             // Get settings
             const fontFamily = document.getElementById('fontFamily').value;
@@ -1297,8 +1407,13 @@
                 return;
             }
             
-            // Prepare text
-            const displayText = `Dear ${name},`;
+            // Prepare text - check if this document uses "Dear" prefix
+            let displayText;
+            if (doc.noDearPrefix) {
+                displayText = name; // Columbia: chỉ tên, không có "Dear"
+            } else {
+                displayText = `Dear ${name},`;
+            }
             
             // Set text properties
             const fontString = `${textStyle} ${fontSize}px ${fontFamily}`;
@@ -1311,8 +1426,32 @@
             const x = canvas.width * posX;
             const y = canvas.height * posY;
             
-            // Draw text (simple, clean)
+            // Draw name text
             ctx.fillText(displayText, x, y);
+            
+            // Draw birth date for Columbia
+            if (doc.showBirthDate && currentBirthDate) {
+                const birthDateFontSize = document.getElementById('birthDateFontSize').value;
+                const birthDateX = document.getElementById('birthDateX').value / 100;
+                const birthDateY = document.getElementById('birthDateY').value / 100;
+                
+                // Format birth date as MM/DD/YYYY
+                const month = String(currentBirthDate.month).padStart(2, '0');
+                const day = String(currentBirthDate.day).padStart(2, '0');
+                const birthDateText = `${month}/${day}/${currentBirthDate.year}`;
+                
+                // Set font for birth date
+                const birthDateFont = `${textStyle} ${birthDateFontSize}px ${fontFamily}`;
+                ctx.font = birthDateFont;
+                ctx.fillStyle = textColor;
+                
+                // Calculate position
+                const bdX = canvas.width * birthDateX;
+                const bdY = canvas.height * birthDateY;
+                
+                // Draw birth date
+                ctx.fillText(birthDateText, bdX, bdY);
+            }
             
             // Update preview text
             updatePreviewText();
