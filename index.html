@@ -305,6 +305,12 @@
             color: #1E4D8C;
         }
         
+        .doc-btn.active[data-doc="dartmouth"] {
+            border-color: #00693E;
+            background: linear-gradient(135deg, #e6fff0 0%, #ccffe6 100%);
+            color: #00693E;
+        }
+        
         .file-upload {
             margin-bottom: 25px;
             padding: 25px;
@@ -729,6 +735,9 @@
                 <button class="doc-btn" data-doc="columbia" onclick="selectDocument('columbia')">
                     🔵 Columbia University
                 </button>
+                <button class="doc-btn" data-doc="dartmouth" onclick="selectDocument('dartmouth')">
+                    🌲 Dartmouth College
+                </button>
             </div>
         </div>
         
@@ -968,6 +977,22 @@
                 name: 'Columbia University (New York, NY)',
                 fileName: 'Columbia.jpg',
                 emailDomain: 'columbia.edu',
+                noDearPrefix: true,  // Không thêm "Dear" trước tên
+                showBirthDate: true, // Hiển thị ngày sinh trên ảnh
+                defaultSettings: {
+                    fontSize: 137,
+                    positionX: 6.5,
+                    positionY: 23.3,
+                    // Vị trí ngày sinh
+                    birthDateFontSize: 128,
+                    birthDateX: 24,
+                    birthDateY: 27.4
+                }
+            },
+            dartmouth: {
+                name: 'Dartmouth College',
+                fileName: 'Dartmouth.jpg',
+                emailDomain: 'dartmouth.edu',
                 noDearPrefix: true,  // Không thêm "Dear" trước tên
                 showBirthDate: true, // Hiển thị ngày sinh trên ảnh
                 defaultSettings: {
@@ -1631,285 +1656,240 @@
         birthYear: "${currentBirthDate.year}",
         email: "${email}",
         targetLanguage: "English (UK)",
-        selectors: {
-            languageInput: '#changeLanguageSelector-input',
-            languageMenu: '#changeLanguageSelector-menu [role="option"]',
-            country: ['input[name*="country" i]', 'input[placeholder*="country" i]', '#sid-country', '[id*="country" i]'],
-            school: '#sid-college-name',
-            schoolMenu: '#sid-college-name-menu [role="option"]',
-            firstName: '#sid-first-name',
-            lastName: '#sid-last-name',
-            birthDayField: '#sid-birthdate-day',
-            birthMonthField: '#sid-birthdate__month',
-            birthMonthMenu: '#sid-birthdate__month-menu [role="option"]',
-            birthYearField: '#sid-birthdate-year',
-            email: '#sid-email'
-        },
-        delays: { default: 300, dropdownWait: 2500, schoolWait: 2000, monthWait: 500, typing: 150, languageWait: 2000 }
+        delays: { default: 400, dropdownWait: 2000, schoolWait: 2500, monthWait: 600, typing: 200, languageWait: 2000 }
     };
     
     const delay = ms => new Promise(r => setTimeout(r, ms));
     
-    const set = async (sel, val) => {
-        const el = document.querySelector(sel);
-        if (!el) return console.log("⚠️ Không tìm thấy: " + sel);
-        el.focus();
-        await delay(CONFIG.delays.typing);
-        el.click();
-        await delay(CONFIG.delays.typing);
-        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set.call(el, val);
-        el.dispatchEvent(new Event("input", { bubbles: true }));
-        await delay(CONFIG.delays.typing);
-        el.dispatchEvent(new Event("change", { bubbles: true }));
-        el.dispatchEvent(new Event("blur", { bubbles: true }));
-        await delay(CONFIG.delays.default);
-        console.log("✅ Đã điền: " + sel);
+    // Hàm tìm input theo nhiều cách
+    const findInput = (selectors) => {
+        for (const sel of selectors) {
+            const el = document.querySelector(sel);
+            if (el) return el;
+        }
+        return null;
     };
     
-    const changeLanguage = async () => {
-        console.log("🌐 Đang thay đổi ngôn ngữ sang English (UK)...");
-        const langInput = document.querySelector(CONFIG.selectors.languageInput);
-        if (!langInput) {
-            console.log("⚠️ Không tìm thấy Language selector");
-            return false;
-        }
-        
-        // Kiểm tra nếu đã là English (UK) thì bỏ qua
-        if (langInput.value === CONFIG.targetLanguage) {
-            console.log("✅ Ngôn ngữ đã là English (UK)");
-            return true;
-        }
-        
-        // Click vào language selector để mở dropdown
-        langInput.focus();
+    // Hàm điền input
+    const fillInput = async (el, value) => {
+        if (!el) return false;
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         await delay(200);
-        langInput.click();
-        await delay(500);
+        el.focus();
+        await delay(100);
+        el.click();
+        await delay(100);
         
-        // Tìm và click vào option English (UK)
-        const menuSels = [CONFIG.selectors.languageMenu, '[role="option"]', '.MuiMenuItem-root', 'li[role="option"]'];
-        for (const sel of menuSels) {
-            const opts = [...document.querySelectorAll(sel)];
-            const target = opts.find(o => {
-                const text = o.innerText?.trim() || o.textContent?.trim() || '';
-                return text === CONFIG.targetLanguage || text.includes('English (UK)');
-            });
-            if (target) {
+        // Clear existing value
+        el.value = '';
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        await delay(100);
+        
+        // Type value
+        for (const char of value) {
+            el.value += char;
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            await delay(30);
+        }
+        
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+        el.dispatchEvent(new Event('blur', { bubbles: true }));
+        await delay(CONFIG.delays.default);
+        return true;
+    };
+    
+    // Hàm click dropdown option
+    const selectOption = async (text, waitTime = 1500) => {
+        await delay(waitTime);
+        const options = document.querySelectorAll('[role="option"], [role="listbox"] li, .MuiAutocomplete-option, [data-option-index]');
+        for (const opt of options) {
+            const optText = (opt.innerText || opt.textContent || '').toLowerCase();
+            if (optText.includes(text.toLowerCase())) {
+                opt.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 await delay(200);
-                target.click();
-                console.log("✅ Đã chọn ngôn ngữ: " + CONFIG.targetLanguage);
-                console.log("⏳ Đang chờ trang cập nhật ngôn ngữ...");
-                await delay(CONFIG.delays.languageWait);
+                opt.click();
+                console.log("✅ Selected: " + text);
+                await delay(500);
                 return true;
             }
         }
-        
-        console.log("⚠️ Không tìm thấy option English (UK) trong dropdown");
+        console.log("⚠️ Option not found: " + text);
         return false;
     };
     
-    const fillCountry = async () => {
-        console.log("🔍 Đang tìm trường Country...");
-        let el = null;
-        for (const sel of CONFIG.selectors.country) {
-            el = document.querySelector(sel);
-            if (el) break;
-        }
-        if (!el) return console.log("⚠️ Không tìm thấy Country");
-        
-        el.focus();
-        await delay(200);
-        el.click();
-        await delay(200);
-        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set.call(el, CONFIG.country);
-        el.dispatchEvent(new Event("input", { bubbles: true }));
+    console.log("🚀 Bắt đầu điền form SheerID...");
+    console.log("📋 Thông tin:", CONFIG.firstName, CONFIG.lastName, CONFIG.email);
+    
+    // === BƯỚC 1: Change Language ===
+    console.log("🌐 Bước 1: Kiểm tra ngôn ngữ...");
+    const langInput = document.querySelector('#changeLanguageSelector-input, [id*="changeLanguage"], [aria-label*="language" i]');
+    if (langInput && !langInput.value.includes('English')) {
+        langInput.click();
         await delay(500);
-        el.dispatchEvent(new Event("change", { bubbles: true }));
-        await delay(CONFIG.delays.dropdownWait);
-        
-        const dropdownSels = ['[role="listbox"] [role="option"]', '[role="option"]', '.MuiAutocomplete-option', 'li[data-option-index]'];
-        const countryLower = CONFIG.country.toLowerCase();
-        for (const sel of dropdownSels) {
-            const opts = document.querySelectorAll(sel);
-            for (const opt of opts) {
-                const text = opt.innerText?.toLowerCase() || '';
-                if (text.includes(countryLower) || text === countryLower) {
-                    await delay(200);
-                    opt.click();
-                    console.log("✅ Đã chọn " + CONFIG.country);
-                    await delay(500);
-                    return;
-                }
-            }
-        }
-        console.log("⚠️ Không tìm thấy option " + CONFIG.country + " trong dropdown");
-    };
+        await selectOption('English (UK)', 500);
+        await delay(CONFIG.delays.languageWait);
+    } else {
+        console.log("✅ Ngôn ngữ đã OK");
+    }
+    await delay(500);
     
-    const pasteSchool = async () => {
-        console.log("🔍 Đang tìm trường School...");
-        const el = document.querySelector(CONFIG.selectors.school);
-        if (!el) return console.log("⚠️ Không tìm thấy School");
-        
-        el.focus();
+    // === BƯỚC 2: Country ===
+    console.log("🌍 Bước 2: Điền Country...");
+    const countrySelectors = [
+        'input[id*="country" i]',
+        'input[name*="country" i]',
+        'input[placeholder*="Country" i]',
+        '[aria-label*="country" i] input',
+        '#country-input',
+        '.sid-field--country input'
+    ];
+    const countryInput = findInput(countrySelectors);
+    if (countryInput) {
+        await fillInput(countryInput, CONFIG.country);
+        await selectOption(CONFIG.country, CONFIG.delays.dropdownWait);
+    } else {
+        console.log("⚠️ Không tìm thấy Country input");
+    }
+    await delay(500);
+    
+    // === BƯỚC 3: School ===
+    console.log("🏫 Bước 3: Điền School...");
+    const schoolSelectors = [
+        'input[id*="college" i]',
+        'input[id*="school" i]',
+        'input[name*="organization" i]',
+        'input[placeholder*="School" i]',
+        'input[placeholder*="search" i]',
+        '.sid-field--organization input',
+        '[aria-label*="school" i] input'
+    ];
+    const schoolInput = findInput(schoolSelectors);
+    if (schoolInput) {
+        await fillInput(schoolInput, CONFIG.schoolName);
+        await selectOption(CONFIG.schoolName.split('(')[0].trim(), CONFIG.delays.schoolWait);
+    } else {
+        console.log("⚠️ Không tìm thấy School input");
+    }
+    await delay(500);
+    
+    // === BƯỚC 4: First Name ===
+    console.log("👤 Bước 4: Điền First Name...");
+    const firstNameSelectors = [
+        'input[id*="first" i]',
+        'input[name*="first" i]',
+        'input[placeholder*="First" i]',
+        '.sid-field--firstName input',
+        '[aria-label*="first name" i]'
+    ];
+    const firstNameInput = findInput(firstNameSelectors);
+    if (firstNameInput) {
+        await fillInput(firstNameInput, CONFIG.firstName);
+    }
+    await delay(300);
+    
+    // === BƯỚC 5: Last Name ===
+    console.log("👤 Bước 5: Điền Last Name...");
+    const lastNameSelectors = [
+        'input[id*="last" i]',
+        'input[name*="last" i]',
+        'input[placeholder*="Last" i]',
+        '.sid-field--lastName input',
+        '[aria-label*="last name" i]'
+    ];
+    const lastNameInput = findInput(lastNameSelectors);
+    if (lastNameInput) {
+        await fillInput(lastNameInput, CONFIG.lastName);
+    }
+    await delay(300);
+    
+    // === BƯỚC 6: Birth Month ===
+    console.log("📅 Bước 6: Chọn Month...");
+    const monthSelectors = [
+        'input[id*="month" i]',
+        'select[id*="month" i]',
+        '[aria-label*="month" i]',
+        '.sid-field--birthDate input[placeholder*="Month" i]',
+        '[placeholder="Month"]'
+    ];
+    const monthInput = findInput(monthSelectors);
+    if (monthInput) {
+        monthInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
         await delay(200);
-        el.click();
-        await delay(200);
-        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, CONFIG.schoolName);
-        el.dispatchEvent(new Event('input', { bubbles: true }));
+        monthInput.click();
         await delay(500);
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-        await delay(CONFIG.delays.schoolWait);
-        
-        const menuSels = [CONFIG.selectors.schoolMenu, '[role="option"]', '.MuiAutocomplete-option'];
-        for (const sel of menuSels) {
-            const opt = document.querySelector(sel);
-            if (opt) {
-                await delay(200);
-                opt.click();
-                console.log("✅ Đã chọn trường: " + CONFIG.schoolName);
-                await delay(500);
-                return;
-            }
-        }
-        console.log("⚠️ Không tìm thấy option trường trong dropdown");
-    };
+        await selectOption(CONFIG.birthMonth, CONFIG.delays.monthWait);
+    }
+    await delay(300);
     
-    const selectMonth = async () => {
-        console.log("🔍 Đang chọn tháng sinh...");
-        const el = document.querySelector(CONFIG.selectors.birthMonthField);
-        if (!el) return console.log("⚠️ Không tìm thấy Month field");
-        
-        el.focus();
-        await delay(200);
-        el.click();
-        await delay(CONFIG.delays.monthWait);
-        el.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
-        await delay(CONFIG.delays.monthWait);
-        
-        const menuSels = [CONFIG.selectors.birthMonthMenu, '[role="option"]', '.MuiMenuItem-root'];
-        for (const sel of menuSels) {
-            const opts = [...document.querySelectorAll(sel)];
-            const target = opts.find(o => {
-                const text = o.innerText?.toLowerCase() || '';
-                return text.includes(CONFIG.birthMonth.toLowerCase()) || text.startsWith(CONFIG.birthMonth.toLowerCase().substring(0,3));
-            });
-            if (target) {
-                await delay(200);
-                target.click();
-                console.log("✅ Đã chọn tháng: " + CONFIG.birthMonth);
-                await delay(400);
-                return;
-            }
-        }
-        console.log("⚠️ Không tìm thấy tháng: " + CONFIG.birthMonth);
-    };
+    // === BƯỚC 7: Birth Day ===
+    console.log("📅 Bước 7: Điền Day...");
+    const daySelectors = [
+        'input[id*="day" i]',
+        'input[name*="day" i]',
+        'input[placeholder*="Day" i]',
+        '.sid-field--birthDate input[placeholder="Day"]'
+    ];
+    const dayInput = findInput(daySelectors);
+    if (dayInput) {
+        await fillInput(dayInput, CONFIG.birthDay);
+    }
+    await delay(300);
     
-    console.log("🚀 Bắt đầu điền form...");
+    // === BƯỚC 8: Birth Year ===
+    console.log("📅 Bước 8: Điền Year...");
+    const yearSelectors = [
+        'input[id*="year" i]',
+        'input[name*="year" i]',
+        'input[placeholder*="Year" i]',
+        '.sid-field--birthDate input[placeholder="Year"]'
+    ];
+    const yearInput = findInput(yearSelectors);
+    if (yearInput) {
+        await fillInput(yearInput, CONFIG.birthYear);
+    }
+    await delay(300);
     
-    console.log("🌐 Bước 1: Thay đổi ngôn ngữ...");
-    await changeLanguage();
+    // === BƯỚC 9: Email ===
+    console.log("📧 Bước 9: Điền Email...");
+    const emailSelectors = [
+        'input[id*="email" i]',
+        'input[name*="email" i]',
+        'input[type="email"]',
+        'input[placeholder*="email" i]',
+        '.sid-field--email input'
+    ];
+    const emailInput = findInput(emailSelectors);
+    if (emailInput) {
+        await fillInput(emailInput, CONFIG.email);
+    }
     await delay(500);
     
-    console.log("⏳ Bước 2: Đang điền Country...");
-    await fillCountry();
-    await delay(500);
-    
-    console.log("⏳ Bước 3: Đang điền School...");
-    await pasteSchool();
-    await delay(500);
-    
-    console.log("⏳ Bước 4: Đang điền First Name...");
-    await set(CONFIG.selectors.firstName, CONFIG.firstName);
-    await delay(200);
-    
-    console.log("⏳ Bước 5: Đang điền Last Name...");
-    await set(CONFIG.selectors.lastName, CONFIG.lastName);
-    await delay(200);
-    
-    console.log("⏳ Bước 6: Đang chọn Month...");
-    await selectMonth();
-    await delay(200);
-    
-    console.log("⏳ Bước 7: Đang điền Day...");
-    await set(CONFIG.selectors.birthDayField, CONFIG.birthDay);
-    await delay(200);
-    
-    console.log("⏳ Bước 8: Đang điền Year...");
-    await set(CONFIG.selectors.birthYearField, CONFIG.birthYear);
-    await delay(200);
-    
-    console.log("⏳ Bước 9: Đang điền Email...");
-    await set(CONFIG.selectors.email, CONFIG.email);
-    await delay(500);
-    
-    console.log("═══════════════════════════════════");
+    console.log("═══════════════════════════════════════════");
     console.log("✅ HOÀN THÀNH ĐIỀN FORM!");
-    console.log("═══════════════════════════════════");
     console.log("👤 Họ tên: " + CONFIG.firstName + " " + CONFIG.lastName);
     console.log("🎂 Ngày sinh: " + CONFIG.birthDay + "/" + CONFIG.birthMonth + "/" + CONFIG.birthYear);
     console.log("📧 Email: " + CONFIG.email);
     console.log("🏫 Trường: " + CONFIG.schoolName);
-    console.log("═══════════════════════════════════");
+    console.log("═══════════════════════════════════════════");
     
-    await delay(800);
+    // === Click Verify ===
+    await delay(1000);
     console.log("🔍 Đang tìm nút Verify...");
-    
-    // Tìm nút theo nhiều cách
-    let verifyBtn = null;
-    
-    // Cách 1: Tìm theo text chính xác
     const allBtns = [...document.querySelectorAll('button, [role="button"], input[type="submit"]')];
-    for (const btn of allBtns) {
-        const text = (btn.innerText || btn.textContent || btn.value || '').toLowerCase().trim();
-        if (text.includes('verify student status') || 
-            text.includes('verify my student') ||
-            text === 'verify' ||
-            text.includes('xác minh')) {
-            verifyBtn = btn;
-            console.log("✅ Tìm thấy nút: " + text);
-            break;
-        }
-    }
+    const verifyBtn = allBtns.find(btn => {
+        const text = (btn.innerText || btn.textContent || btn.value || '').toLowerCase();
+        return text.includes('verify') || text.includes('submit') || text.includes('xác minh');
+    });
     
-    // Cách 2: Tìm nút submit cuối cùng trong form
-    if (!verifyBtn) {
-        const forms = document.querySelectorAll('form');
-        for (const form of forms) {
-            const submitBtn = form.querySelector('button[type="submit"], button:last-of-type');
-            if (submitBtn) {
-                verifyBtn = submitBtn;
-                console.log("✅ Tìm thấy nút submit trong form");
-                break;
-            }
-        }
-    }
-    
-    // Cách 3: Tìm nút có màu xanh/primary
-    if (!verifyBtn) {
-        const colorBtns = document.querySelectorAll('button[class*="primary"], button[class*="submit"], button[class*="blue"]');
-        if (colorBtns.length > 0) {
-            verifyBtn = colorBtns[colorBtns.length - 1];
-            console.log("✅ Tìm thấy nút primary/submit");
-        }
-    }
-    
-    if (verifyBtn) {
+    if (verifyBtn && !verifyBtn.disabled) {
         verifyBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
         await delay(500);
-        console.log("📍 Nút vị trí: ", verifyBtn.getBoundingClientRect());
-        
-        if (!verifyBtn.disabled && !verifyBtn.getAttribute('disabled')) {
-            verifyBtn.focus();
-            await delay(200);
-            verifyBtn.click();
-            console.log("✅ Đã click nút xác minh!");
-        } else {
-            console.log("⚠️ Nút bị disabled, vui lòng kiểm tra lại form");
-            console.log("💡 Thử click thủ công nút 'Verify student status'");
-        }
+        verifyBtn.focus();
+        await delay(200);
+        verifyBtn.click();
+        console.log("✅ Đã click nút Verify!");
     } else {
-        console.log("⚠️ Không tìm thấy nút Verify");
-        console.log("💡 Vui lòng click thủ công nút 'Verify student status'");
+        console.log("⚠️ Vui lòng click thủ công nút Verify");
     }
 })();`;
             
