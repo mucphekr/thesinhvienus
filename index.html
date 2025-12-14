@@ -311,6 +311,12 @@
             color: #00693E;
         }
         
+        .doc-btn.active[data-doc="stanford"] {
+            border-color: #8C1515;
+            background: linear-gradient(135deg, #ffe6e6 0%, #ffcccc 100%);
+            color: #8C1515;
+        }
+        
         .file-upload {
             margin-bottom: 25px;
             padding: 25px;
@@ -738,6 +744,9 @@
                 <button class="doc-btn" data-doc="dartmouth" onclick="selectDocument('dartmouth')">
                     🌲 Dartmouth College
                 </button>
+                <button class="doc-btn" data-doc="stanford" onclick="selectDocument('stanford')">
+                    🌳 Stanford University
+                </button>
             </div>
         </div>
         
@@ -993,6 +1002,22 @@
                 name: 'Dartmouth College',
                 fileName: 'Dartmouth.jpg',
                 emailDomain: 'dartmouth.edu',
+                noDearPrefix: true,  // Không thêm "Dear" trước tên
+                showBirthDate: true, // Hiển thị ngày sinh trên ảnh
+                defaultSettings: {
+                    fontSize: 137,
+                    positionX: 6.5,
+                    positionY: 23.3,
+                    // Vị trí ngày sinh
+                    birthDateFontSize: 128,
+                    birthDateX: 24,
+                    birthDateY: 27.4
+                }
+            },
+            stanford: {
+                name: 'Stanford University',
+                fileName: 'Stanford.jpg',
+                emailDomain: 'stanford.edu',
                 noDearPrefix: true,  // Không thêm "Dear" trước tên
                 showBirthDate: true, // Hiển thị ngày sinh trên ảnh
                 defaultSettings: {

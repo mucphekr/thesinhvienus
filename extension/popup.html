@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SheerID Auto Fill</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            width: 320px;
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(180deg, #fef7f0 0%, #fff5eb 100%);
+        }
+        
+        .container {
+            padding: 16px;
+        }
+        
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+        
+        .header-text h1 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        
+        .header-text p {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+        
+        /* Input Card */
+        .card {
+            background: white;
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+        }
+        
+        .card-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+        
+        .label-icon {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 12px 40px 12px 14px;
+            background: #f9fafb;
+            border: 2px solid #f3f4f6;
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 12px;
+            color: #1f2937;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            border-color: #ff6b35;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+        
+        .input-field::placeholder {
+            color: #d1d5db;
+        }
+        
+        .clear-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 26px;
+            height: 26px;
+            border: none;
+            border-radius: 8px;
+            background: #fee2e2;
+            color: #ef4444;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .clear-btn:hover {
+            background: #fecaca;
+        }
+        
+        .input-hint {
+            margin-top: 8px;
+            font-size: 10px;
+            color: #9ca3af;
+        }
+        
+        .error-msg {
+            display: none;
+            margin-top: 8px;
+            padding: 8px 10px;
+            background: #fef2f2;
+            border-radius: 8px;
+            font-size: 11px;
+            color: #dc2626;
+        }
+        
+        .error-msg.show {
+            display: block;
+        }
+        
+        /* University Grid */
+        .uni-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .uni-option {
+            cursor: pointer;
+        }
+        
+        .uni-option input {
+            display: none;
+        }
+        
+        .uni-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: #f9fafb;
+            border: 2px solid #f3f4f6;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+        
+        .uni-btn:hover {
+            border-color: #fcd9c9;
+        }
+        
+        .uni-option input:checked + .uni-btn {
+            border-color: #ff6b35;
+            background: #fff7f3;
+        }
+        
+        .uni-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .uni-avatar.cornell { background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%); }
+        .uni-avatar.umd { background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); }
+        .uni-avatar.csu { background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%); }
+        .uni-avatar.au { background: linear-gradient(135deg, #be123c 0%, #e11d48 100%); }
+        .uni-avatar.columbia { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); }
+        .uni-avatar.dartmouth { background: linear-gradient(135deg, #00693E 0%, #00875A 100%); }
+        .uni-avatar.stanford { background: linear-gradient(135deg, #8C1515 0%, #B83A3A 100%); }
+        
+        .uni-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: #374151;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Main Button */
+        .btn-main {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            border: none;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 16px rgba(255, 107, 53, 0.35);
+            margin-bottom: 14px;
+        }
+        
+        .btn-main:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+        }
+        
+        /* Quick Actions */
+        .quick-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        
+        .quick-line {
+            flex: 1;
+            height: 1px;
+            background: #e5e7eb;
+        }
+        
+        .quick-text {
+            font-size: 10px;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .quick-btns {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-quick {
+            flex: 1;
+            padding: 10px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .btn-quick:hover {
+            border-color: #ff6b35;
+            color: #ff6b35;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 10px;
+            color: #9ca3af;
+        }
+        
+        .footer a {
+            color: #ff6b35;
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🎓</div>
+            <div class="header-text">
+                <h1>SheerID Auto Fill</h1>
+                <p>Xác minh sinh viên tự động</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-label">
+                <span class="label-icon">🔗</span>
+                Link SheerID
+            </div>
+            <div class="input-wrapper">
+                <input type="text" class="input-field" id="sheeridUrl" 
+                       placeholder="Dán link SheerID vào đây...">
+                <button type="button" class="clear-btn" id="clearUrl">×</button>
+            </div>
+            <div class="input-hint">💡 https://services.sheerid.com/verify/...</div>
+            <div class="error-msg" id="errorMsg">⚠️ Link không hợp lệ</div>
+        </div>
+        
+        <div class="card">
+            <div class="card-label">
+                <span class="label-icon">🏫</span>
+                Chọn trường
+            </div>
+            <div class="uni-grid">
+                <label class="uni-option">
+                    <input type="radio" name="university" value="cornell" checked>
+                    <div class="uni-btn">
+                        <div class="uni-avatar cornell">C</div>
+                        <span class="uni-name">Cornell</span>
+                    </div>
+                </label>
+                <label class="uni-option">
+                    <input type="radio" name="university" value="umd">
+                    <div class="uni-btn">
+                        <div class="uni-avatar umd">U</div>
+                        <span class="uni-name">UMD</span>
+                    </div>
+                </label>
+                <label class="uni-option">
+                    <input type="radio" name="university" value="csu">
+                    <div class="uni-btn">
+                        <div class="uni-avatar csu">C</div>
+                        <span class="uni-name">CSU Fullerton</span>
+                    </div>
+                </label>
+                <label class="uni-option">
+                    <input type="radio" name="university" value="au">
+                    <div class="uni-btn">
+                        <div class="uni-avatar au">A</div>
+                        <span class="uni-name">American U</span>
+                    </div>
+                </label>
+                <label class="uni-option">
+                    <input type="radio" name="university" value="columbia">
+                    <div class="uni-btn">
+                        <div class="uni-avatar columbia">C</div>
+                        <span class="uni-name">Columbia</span>
+                    </div>
+                </label>
+                <label class="uni-option">
+                    <input type="radio" name="university" value="dartmouth">
+                    <div class="uni-btn">
+                        <div class="uni-avatar dartmouth">D</div>
+                        <span class="uni-name">Dartmouth</span>
+                    </div>
+                </label>
+                <label class="uni-option">
+                    <input type="radio" name="university" value="stanford">
+                    <div class="uni-btn">
+                        <div class="uni-avatar stanford">S</div>
+                        <span class="uni-name">Stanford</span>
+                    </div>
+                </label>
+            </div>
+        </div>
+        
+        <button class="btn-main" id="startAutoFill">
+            🚀 Bắt đầu Auto Fill
+        </button>
+        
+        <div class="quick-section">
+            <div class="quick-line"></div>
+            <span class="quick-text">Mở nhanh</span>
+            <div class="quick-line"></div>
+        </div>
+        
+        <div class="quick-btns">
+            <button class="btn-quick" id="openSheerID">🔗 SheerID</button>
+            <button class="btn-quick" id="openGenerator">⚡ Generator</button>
+        </div>
+        
+        <div class="footer">
+            Made with ❤️ by <a href="#">Mực Phệ</a>
+        </div>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>

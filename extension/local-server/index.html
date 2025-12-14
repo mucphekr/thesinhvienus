@@ -1,0 +1,1954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Admission Letter Generator</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Libre Baskerville', Georgia, serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            color: #fff;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            color: #B31B1B;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        
+        .header p {
+            color: #ccc;
+            font-style: italic;
+            font-size: 1.1rem;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            max-width: 1000px;
+            width: 100%;
+        }
+        
+        .input-section {
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        
+        .input-field {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .input-field label {
+            display: block;
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .input-field input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-family: 'Andale Mono', 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+        
+        .input-field input:focus {
+            outline: none;
+            border-color: #B31B1B;
+            box-shadow: 0 0 15px rgba(179, 27, 27, 0.2);
+        }
+        
+        .btn {
+            padding: 15px 35px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Libre Baskerville', serif;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #B31B1B 0%, #8B0000 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(179, 27, 27, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(44, 62, 80, 0.4);
+        }
+        
+        .btn-random {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            color: white;
+        }
+        
+        .btn-random:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(40, 167, 69, 0.4);
+        }
+        
+        .btn-random:disabled {
+            opacity: 0.7;
+            cursor: wait;
+        }
+        
+        .canvas-section {
+            text-align: center;
+        }
+        
+        .canvas-wrapper {
+            position: relative;
+            display: inline-block;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            margin-bottom: 25px;
+            background: #f0f0f0;
+        }
+        
+        #imageCanvas {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .top-controls {
+            margin-top: 0;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+            border-radius: 12px;
+        }
+        
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .setting-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .setting-item label {
+            font-size: 0.9rem;
+            color: #555;
+            font-weight: 600;
+        }
+        
+        .setting-item input[type="range"] {
+            flex: 1;
+            accent-color: #B31B1B;
+        }
+        
+        .setting-item input[type="number"] {
+            width: 70px;
+            padding: 8px 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            text-align: center;
+        }
+        
+        .setting-item input[type="number"]:focus {
+            outline: none;
+            border-color: #B31B1B;
+        }
+        
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .setting-item input[type="color"] {
+            width: 60px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .setting-item select {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+        
+        .document-selector {
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .document-selector label {
+            display: block;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+        
+        .doc-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .doc-btn {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            color: #555;
+        }
+        
+        .doc-btn:hover {
+            border-color: #999;
+            background: #f8f9fa;
+        }
+        
+        .doc-btn.active[data-doc="cornell"] {
+            border-color: #B31B1B;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
+            color: #B31B1B;
+        }
+        
+        .doc-btn.active[data-doc="umd"] {
+            border-color: #E21833;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
+            color: #E21833;
+        }
+        
+        .doc-btn.active[data-doc="csu"] {
+            border-color: #00274C;
+            background: linear-gradient(135deg, #e6f3ff 0%, #cce5ff 100%);
+            color: #00274C;
+        }
+        
+        .doc-btn.active[data-doc="au"] {
+            border-color: #CC0000;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
+            color: #CC0000;
+        }
+        
+        .doc-btn.active[data-doc="columbia"] {
+            border-color: #1E4D8C;
+            background: linear-gradient(135deg, #e6f0ff 0%, #cce0ff 100%);
+            color: #1E4D8C;
+        }
+        
+        .doc-btn.active[data-doc="dartmouth"] {
+            border-color: #00693E;
+            background: linear-gradient(135deg, #e6fff0 0%, #ccffe6 100%);
+            color: #00693E;
+        }
+        
+        .doc-btn.active[data-doc="stanford"] {
+            border-color: #8C1515;
+            background: linear-gradient(135deg, #ffe6e6 0%, #ffcccc 100%);
+            color: #8C1515;
+        }
+        
+        .file-upload {
+            margin-bottom: 25px;
+            padding: 25px;
+            border: 3px dashed #B31B1B;
+            border-radius: 15px;
+            text-align: center;
+            background: #fff5f5;
+        }
+        
+        .file-upload.loaded {
+            border-color: #28a745;
+            background: #f0fff4;
+        }
+        
+        .file-upload label {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #B31B1B 0%, #8B0000 100%);
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+        }
+        
+        .file-upload label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(179, 27, 27, 0.4);
+        }
+        
+        .file-upload input {
+            display: none;
+        }
+        
+        .file-upload p {
+            color: #666;
+            margin-top: 15px;
+            font-size: 0.95rem;
+        }
+        
+        .status-message {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
+        .collapsible-section {
+            margin-bottom: 15px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #ddd;
+        }
+        
+        .toggle-btn {
+            width: 100%;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: none;
+            text-align: left;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #333;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        
+        .toggle-btn:hover {
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+        }
+        
+        .toggle-icon {
+            font-size: 0.8rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .toggle-btn.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+        
+        .collapsible-content {
+            padding: 15px 20px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        
+        .collapsible-content.hidden {
+            display: none;
+        }
+        
+        .collapsible-content ol {
+            margin-left: 20px;
+            color: #555;
+        }
+        
+        .collapsible-content li {
+            margin-bottom: 8px;
+        }
+        
+        .preview-text {
+            font-family: 'Andale Mono', 'Courier New', monospace;
+            font-size: 1.2rem;
+            color: #333;
+            background: #e9ecef;
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+            padding: 12px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px;
+            border: 1px solid #dee2e6;
+        }
+        
+        @media (max-width: 800px) {
+            .info-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 500px) {
+            .info-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .info-card {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .info-label {
+            font-size: 0.7rem;
+            color: #888;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-value {
+            font-size: 0.9rem;
+            color: #333;
+            font-weight: 600;
+            word-break: break-all;
+            min-height: 20px;
+            line-height: 1.3;
+        }
+        
+        .btn-copy {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            background: #6c757d;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            margin-top: 4px;
+        }
+        
+        .btn-copy:hover {
+            background: #5a6268;
+        }
+        
+        .btn-copy.copied {
+            background: #28a745;
+        }
+        
+        /* Autofill Script Section */
+        .autofill-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 12px;
+            border: 2px solid #4a4a6a;
+        }
+        
+        .autofill-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .autofill-header h3 {
+            color: #00d4ff;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+        
+        .autofill-header p {
+            color: #aaa;
+            font-size: 0.8rem;
+        }
+        
+        .autofill-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 600px) {
+            .autofill-info {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .autofill-info-item {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .autofill-info-label {
+            color: #888;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+        }
+        
+        .autofill-info-value {
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .autofill-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn-autofill {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: #1a1a2e;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+        
+        .btn-autofill:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 212, 255, 0.4);
+        }
+        
+        .btn-copy-script {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+        
+        .btn-copy-script:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(155, 89, 182, 0.4);
+        }
+        
+        .btn-copy-script.copied {
+            background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
+        }
+        
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .container {
+                padding: 25px;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+        
+        /* Toast Notification */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .toast {
+            background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            font-family: 'Libre Baskerville', Georgia, serif;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(120%);
+            animation: slideIn 0.4s ease forwards;
+            max-width: 350px;
+        }
+        
+        .toast.hiding {
+            animation: slideOut 0.4s ease forwards;
+        }
+        
+        .toast-icon {
+            font-size: 1.3rem;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <div class="header">
+        <h1>🎓 University Admission Letter</h1>
+        <p>Student Name Generator</p>
+    </div>
+    
+    <div class="container">
+        <div class="collapsible-section">
+            <button class="toggle-btn" onclick="toggleSection('instructions', this)">
+                <span class="toggle-icon">▼</span> 📋 Hướng dẫn sử dụng
+            </button>
+            <div class="collapsible-content" id="instructions">
+                <ol>
+                    <li><strong>Bước 1:</strong> Click "📁 Chọn ảnh CORNELL UNI.jpg" và chọn file ảnh</li>
+                    <li><strong>Bước 2:</strong> Nhập họ tên sinh viên vào ô bên dưới</li>
+                    <li><strong>Bước 3:</strong> Tùy chỉnh font chữ, kích thước, màu sắc và vị trí</li>
+                    <li><strong>Bước 4:</strong> Nhấn "Download Image" để tải ảnh về</li>
+                </ol>
+            </div>
+        </div>
+        
+        <!-- Quick Action Buttons - Moved to top -->
+        <div class="controls top-controls">
+            <button class="btn btn-secondary" onclick="downloadImage()">💾 Download Image</button>
+            <button class="btn btn-secondary" onclick="resetSettings()">↩️ Reset Settings</button>
+        </div>
+        
+        <div class="document-selector">
+            <label>🎓 Chọn trường đại học:</label>
+            <div class="doc-buttons">
+                <button class="doc-btn active" data-doc="cornell" onclick="selectDocument('cornell')">
+                    🔴 Cornell University
+                </button>
+                <button class="doc-btn" data-doc="umd" onclick="selectDocument('umd')">
+                    🔴 UMD-College Park
+                </button>
+                <button class="doc-btn" data-doc="csu" onclick="selectDocument('csu')">
+                    🔵 CSU Fullerton
+                </button>
+                <button class="doc-btn" data-doc="au" onclick="selectDocument('au')">
+                    🔴 American University
+                </button>
+                <button class="doc-btn" data-doc="columbia" onclick="selectDocument('columbia')">
+                    🔵 Columbia University
+                </button>
+                <button class="doc-btn" data-doc="dartmouth" onclick="selectDocument('dartmouth')">
+                    🌲 Dartmouth College
+                </button>
+                <button class="doc-btn" data-doc="stanford" onclick="selectDocument('stanford')">
+                    🌳 Stanford University
+                </button>
+            </div>
+        </div>
+        
+        <div class="file-upload" id="fileUploadArea" style="display: none;">
+            <label for="imageUpload">📁 <span id="uploadLabel">Chọn ảnh CORNELL UNI.jpg</span></label>
+            <input type="file" id="imageUpload" accept="image/*">
+            <p id="uploadStatus">⚠️ Vui lòng chọn file ảnh "<span id="expectedFile">CORNELL UNI.jpg</span>" từ thư mục của bạn</p>
+        </div>
+        
+        <div id="statusMessage" class="status-message status-warning" style="display: none;"></div>
+        
+        <div class="input-section">
+            <div class="input-group">
+                <div class="input-field">
+                    <label for="studentName">👤 Student Full Name (Họ và tên sinh viên)</label>
+                    <input type="text" id="studentName" placeholder="e.g. John Michael Smith">
+                </div>
+                <button class="btn btn-random" onclick="generateRandomName()">🎲 Random US Name</button>
+            </div>
+            
+            <div class="preview-text" id="previewText">Dear [Student Name],</div>
+            
+            <!-- Student Info Copy Section -->
+            <div class="info-cards" id="infoCards" style="display: none;">
+                <div class="info-card">
+                    <div class="info-label">🏫 Tên trường</div>
+                    <div class="info-value" id="schoolName">Cornell University</div>
+                    <button class="btn-copy" onclick="copyToClipboard('schoolName', this)">📋 Copy</button>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">👤 Họ sinh viên</div>
+                    <div class="info-value" id="lastName">-</div>
+                    <button class="btn-copy" onclick="copyToClipboard('lastName', this)">📋 Copy</button>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">👤 Tên sinh viên</div>
+                    <div class="info-value" id="firstName">-</div>
+                    <button class="btn-copy" onclick="copyToClipboard('firstName', this)">📋 Copy</button>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">📧 Email</div>
+                    <div class="info-value" id="studentEmail">-</div>
+                    <button class="btn-copy" onclick="copyToClipboard('studentEmail', this)">📋 Copy</button>
+                </div>
+            </div>
+            
+            <!-- Autofill Script Generator -->
+            <div class="autofill-section" id="autofillSection" style="display: none;">
+                <div class="autofill-header">
+                    <h3>🤖 Script Điền Form Tự Động</h3>
+                    <p>Tạo script để tự động điền form xác minh sinh viên</p>
+                </div>
+                <div class="autofill-info">
+                    <div class="autofill-info-item">
+                        <div class="autofill-info-label">🎂 Ngày sinh</div>
+                        <div class="autofill-info-value" id="birthDate">-</div>
+                    </div>
+                    <div class="autofill-info-item">
+                        <div class="autofill-info-label">🌍 Quốc gia</div>
+                        <div class="autofill-info-value" id="countryName">United States</div>
+                    </div>
+                    <div class="autofill-info-item">
+                        <div class="autofill-info-label">📦 Script size</div>
+                        <div class="autofill-info-value" id="scriptSize">-</div>
+                    </div>
+                </div>
+                <div class="autofill-controls">
+                    <button class="btn-autofill" onclick="generateAutofillScript()">⚡ Tạo Script</button>
+                    <button class="btn-copy-script" onclick="copyAutofillScript()">📋 Copy Script</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="collapsible-section">
+            <button class="toggle-btn" onclick="toggleSection('textSettings', this)">
+                <span class="toggle-icon">▼</span> ⚙️ Text Settings
+            </button>
+            <div class="collapsible-content" id="textSettings">
+            <div class="settings-grid">
+                <div class="setting-item">
+                    <label for="fontFamily">Font Family</label>
+                    <select id="fontFamily">
+                        <option value="Andale Mono, monospace">Andale Mono</option>
+                        <option value="Courier New, monospace">Courier New (WorldType style)</option>
+                        <option value="Georgia, serif">Georgia</option>
+                        <option value="Times New Roman, serif" selected>Times New Roman</option>
+                        <option value="Arial, sans-serif">Arial</option>
+                    </select>
+                </div>
+                
+                <div class="setting-item">
+                    <label for="fontSize">Font Size (px)</label>
+                    <div class="input-row">
+                        <input type="range" id="fontSizeRange" min="16" max="150" step="0.5" value="94.5">
+                        <input type="number" id="fontSize" min="16" max="200" step="0.1" value="94.5">
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <label for="textColor">Text Color</label>
+                    <input type="color" id="textColor" value="#000000">
+                </div>
+                
+                <div class="setting-item">
+                    <label for="positionX">Position X (%)</label>
+                    <div class="input-row">
+                        <input type="range" id="positionXRange" min="0" max="100" step="0.1" value="9.7">
+                        <input type="number" id="positionX" min="0" max="100" step="0.1" value="9.7">
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <label for="positionY">Position Y (%)</label>
+                    <div class="input-row">
+                        <input type="range" id="positionYRange" min="0" max="100" step="0.1" value="22.8">
+                        <input type="number" id="positionY" min="0" max="100" step="0.1" value="22.8">
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <label for="textStyle">Text Style</label>
+                    <select id="textStyle">
+                        <option value="">Normal</option>
+                        <option value="bold" selected>Bold</option>
+                        <option value="italic">Italic</option>
+                        <option value="bold italic">Bold Italic</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Birth Date Position Settings (for Columbia) -->
+            <div id="birthDateSettings" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 2px dashed #ddd;">
+                <h4 style="color: #1E4D8C; margin-bottom: 15px;">📅 Cài đặt vị trí Ngày sinh (Columbia)</h4>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label for="birthDateFontSize">Birth Date Font Size (px)</label>
+                        <div class="input-row">
+                            <input type="range" id="birthDateFontSizeRange" min="10" max="150" step="0.5" value="70">
+                            <input type="number" id="birthDateFontSize" min="10" max="200" step="0.1" value="70">
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label for="birthDateX">Birth Date X (%)</label>
+                        <div class="input-row">
+                            <input type="range" id="birthDateXRange" min="0" max="100" step="0.1" value="10">
+                            <input type="number" id="birthDateX" min="0" max="100" step="0.1" value="10">
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label for="birthDateY">Birth Date Y (%)</label>
+                        <div class="input-row">
+                            <input type="range" id="birthDateYRange" min="0" max="100" step="0.1" value="30">
+                            <input type="number" id="birthDateY" min="0" max="100" step="0.1" value="30">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+        
+        <div class="canvas-section">
+            <div class="canvas-wrapper">
+                <canvas id="imageCanvas" width="800" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let originalImage = null;
+        let generatedScript = '';
+        let currentBirthDate = null;
+        const canvas = document.getElementById('imageCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Toast notification function
+        function showToast(message, duration = 2500) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<span class="toast-icon">✅</span><span>${message}</span>`;
+            container.appendChild(toast);
+            
+            // Auto remove after duration
+            setTimeout(() => {
+                toast.classList.add('hiding');
+                setTimeout(() => {
+                    toast.remove();
+                }, 400);
+            }, duration);
+        }
+        
+        // Document configurations
+        const documents = {
+            cornell: {
+                name: 'Cornell University',
+                fileName: 'CORNELL UNI.jpg',
+                emailDomain: 'cornell.edu',
+                defaultSettings: {
+                    fontSize: 94.5,
+                    positionX: 9.7,
+                    positionY: 22.8
+                }
+            },
+            umd: {
+                name: 'University of Maryland-College Park (College Park, MD)',
+                fileName: 'UMD.jpg',
+                emailDomain: 'umd.edu',
+                defaultSettings: {
+                    fontSize: 80,
+                    positionX: 9.9,
+                    positionY: 22.3
+                }
+            },
+            csu: {
+                name: 'California State University, Fullerton (Fullerton, CA)',
+                fileName: 'CSU.jpg',
+                emailDomain: 'fullerton.edu',
+                defaultSettings: {
+                    fontSize: 31,
+                    positionX: 9.8,
+                    positionY: 15.7
+                }
+            },
+            au: {
+                name: 'American University (Washington, DC)',
+                fileName: 'AU.jpg',
+                emailDomain: 'american.edu',
+                defaultSettings: {
+                    fontSize: 93.5,
+                    positionX: 10,
+                    positionY: 18.5
+                }
+            },
+            columbia: {
+                name: 'Columbia University (New York, NY)',
+                fileName: 'Columbia.jpg',
+                emailDomain: 'columbia.edu',
+                noDearPrefix: true,  // Không thêm "Dear" trước tên
+                showBirthDate: true, // Hiển thị ngày sinh trên ảnh
+                defaultSettings: {
+                    fontSize: 137,
+                    positionX: 6.5,
+                    positionY: 23.3,
+                    // Vị trí ngày sinh
+                    birthDateFontSize: 128,
+                    birthDateX: 24,
+                    birthDateY: 27.4
+                }
+            },
+            dartmouth: {
+                name: 'Dartmouth College',
+                fileName: 'Dartmouth.jpg',
+                emailDomain: 'dartmouth.edu',
+                noDearPrefix: true,  // Không thêm "Dear" trước tên
+                showBirthDate: true, // Hiển thị ngày sinh trên ảnh
+                defaultSettings: {
+                    fontSize: 137,
+                    positionX: 6.5,
+                    positionY: 23.3,
+                    // Vị trí ngày sinh
+                    birthDateFontSize: 128,
+                    birthDateX: 24,
+                    birthDateY: 27.4
+                }
+            },
+            stanford: {
+                name: 'Stanford University',
+                fileName: 'Stanford.jpg',
+                emailDomain: 'stanford.edu',
+                noDearPrefix: true,  // Không thêm "Dear" trước tên
+                showBirthDate: true, // Hiển thị ngày sinh trên ảnh
+                defaultSettings: {
+                    fontSize: 137,
+                    positionX: 6.5,
+                    positionY: 23.3,
+                    // Vị trí ngày sinh
+                    birthDateFontSize: 128,
+                    birthDateX: 24,
+                    birthDateY: 27.4
+                }
+            }
+        };
+        
+        // Auto-load image from server
+        function loadDocumentImage(docId) {
+            const doc = documents[docId];
+            const img = new Image();
+            
+            // Enable CORS for the image to allow canvas export
+            img.crossOrigin = 'anonymous';
+            
+            // Show loading state
+            canvas.width = 800;
+            canvas.height = 200;
+            ctx.fillStyle = '#f5f5f5';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#666';
+            ctx.font = '20px Georgia';
+            ctx.textAlign = 'center';
+            ctx.fillText('⏳ Đang tải ảnh ' + doc.fileName + '...', canvas.width / 2, canvas.height / 2);
+            
+            // Set timeout for loading (3 seconds)
+            const loadTimeout = setTimeout(function() {
+                console.warn('Image load timeout for:', doc.fileName);
+                showUploadFallback(doc);
+            }, 3000);
+            
+            img.onload = function() {
+                clearTimeout(loadTimeout);
+                originalImage = img;
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+                
+                // Hide file upload area since auto-load succeeded
+                document.getElementById('fileUploadArea').style.display = 'none';
+                showToast('Đã tải ảnh ' + doc.name);
+                
+                // Apply name if already entered
+                applyName();
+            };
+            
+            img.onerror = function() {
+                clearTimeout(loadTimeout);
+                console.error('Failed to load image:', doc.fileName);
+                console.info('💡 Nếu chạy local, hãy dùng Live Server hoặc upload lên GitHub Pages');
+                // Try loading without CORS (for local development)
+                loadImageWithoutCORS(docId);
+            };
+            
+            // Load image from same directory (encode spaces in filename)
+            img.src = encodeURI(doc.fileName);
+        }
+        
+        // Fallback: Load image without CORS for local development
+        function loadImageWithoutCORS(docId) {
+            const doc = documents[docId];
+            const img = new Image();
+            
+            img.onload = function() {
+                originalImage = img;
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+                
+                document.getElementById('fileUploadArea').style.display = 'none';
+                showToast('Đã tải ảnh ' + doc.name + ' (local mode)');
+                applyName();
+            };
+            
+            img.onerror = function() {
+                showUploadFallback(doc);
+            };
+            
+            img.src = encodeURI(doc.fileName);
+        }
+        
+        function showUploadFallback(doc) {
+            // Show file upload section as fallback
+            document.getElementById('fileUploadArea').style.display = 'block';
+            document.getElementById('fileUploadArea').classList.remove('loaded');
+            document.getElementById('uploadStatus').innerHTML = '⚠️ Vui lòng upload file "<strong>' + doc.fileName + '</strong>" từ thư mục của bạn';
+            document.getElementById('uploadLabel').textContent = 'Chọn ảnh ' + doc.fileName;
+            
+            canvas.width = 800;
+            canvas.height = 200;
+            ctx.fillStyle = '#fff3cd';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#856404';
+            ctx.font = '18px Georgia';
+            ctx.textAlign = 'center';
+            ctx.fillText('👆 Vui lòng upload ảnh ' + doc.fileName + ' ở trên', canvas.width / 2, canvas.height / 2);
+        }
+        
+        let currentDoc = 'cornell';
+        
+        // Select document
+        function selectDocument(docId) {
+            currentDoc = docId;
+            const doc = documents[docId];
+            
+            // Update button states
+            document.querySelectorAll('.doc-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-doc="${docId}"]`).classList.add('active');
+            
+            // Update upload section
+            document.getElementById('uploadLabel').textContent = `Chọn ảnh ${doc.fileName}`;
+            document.getElementById('expectedFile').textContent = doc.fileName;
+            
+            // Update school name in info cards
+            document.getElementById('schoolName').textContent = doc.name;
+            
+            // Apply default settings for this document
+            document.getElementById('fontSize').value = doc.defaultSettings.fontSize;
+            document.getElementById('fontSizeRange').value = doc.defaultSettings.fontSize;
+            document.getElementById('positionX').value = doc.defaultSettings.positionX;
+            document.getElementById('positionXRange').value = doc.defaultSettings.positionX;
+            document.getElementById('positionY').value = doc.defaultSettings.positionY;
+            document.getElementById('positionYRange').value = doc.defaultSettings.positionY;
+            document.getElementById('textStyle').value = 'bold';
+            
+            // Show/hide birth date settings for Columbia
+            const birthDateSettings = document.getElementById('birthDateSettings');
+            if (doc.showBirthDate) {
+                birthDateSettings.style.display = 'block';
+                // Set birth date position defaults
+                document.getElementById('birthDateFontSize').value = doc.defaultSettings.birthDateFontSize || 40;
+                document.getElementById('birthDateFontSizeRange').value = doc.defaultSettings.birthDateFontSize || 40;
+                document.getElementById('birthDateX').value = doc.defaultSettings.birthDateX || 10;
+                document.getElementById('birthDateXRange').value = doc.defaultSettings.birthDateX || 10;
+                document.getElementById('birthDateY').value = doc.defaultSettings.birthDateY || 30;
+                document.getElementById('birthDateYRange').value = doc.defaultSettings.birthDateY || 30;
+            } else {
+                birthDateSettings.style.display = 'none';
+            }
+            
+            // Update school name in info cards
+            document.getElementById('schoolName').textContent = doc.name;
+            
+            // Update email if name exists
+            updatePreviewText();
+            
+            // Clear student name when switching documents
+            document.getElementById('studentName').value = '';
+            document.getElementById('infoCards').style.display = 'none';
+            document.getElementById('autofillSection').style.display = 'none';
+            currentBirthDate = null;
+            
+            // Auto-load the document image
+            loadDocumentImage(docId);
+        }
+        
+        // Toggle collapsible sections
+        function toggleSection(sectionId, button) {
+            const content = document.getElementById(sectionId);
+            content.classList.toggle('hidden');
+            button.classList.toggle('collapsed');
+        }
+        
+        // Initialize
+        window.onload = function() {
+            setupEventListeners();
+            
+            // Start with sections collapsed for cleaner UI
+            document.getElementById('instructions').classList.add('hidden');
+            document.querySelector('[onclick*="instructions"]').classList.add('collapsed');
+            
+            // Auto-load the first document image (Cornell)
+            loadDocumentImage('cornell');
+        };
+        
+        function showPlaceholder() {
+            const doc = documents[currentDoc];
+            canvas.width = 800;
+            canvas.height = 200;
+            ctx.fillStyle = '#f5f5f5';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#999';
+            ctx.font = '20px Georgia';
+            ctx.textAlign = 'center';
+            ctx.fillText('📷 Đang tải ảnh ' + doc.fileName + '...', canvas.width / 2, canvas.height / 2);
+        }
+        
+        function showStatus(message, isSuccess) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = 'status-message ' + (isSuccess ? 'status-success' : 'status-warning');
+            statusEl.style.display = 'block';
+            
+            if (isSuccess) {
+                setTimeout(() => {
+                    statusEl.style.display = 'none';
+                }, 3000);
+            }
+        }
+        
+        function setupEventListeners() {
+            // File upload (fallback when auto-load fails)
+            document.getElementById('imageUpload').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const img = new Image();
+                        img.onload = function() {
+                            originalImage = img;
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                            ctx.drawImage(img, 0, 0);
+                            
+                            // Hide file upload area after successful upload
+                            document.getElementById('fileUploadArea').style.display = 'none';
+                            showToast('Đã tải ảnh: ' + file.name);
+                            
+                            // Apply name if already entered
+                            applyName();
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Live preview for student name - apply immediately
+            document.getElementById('studentName').addEventListener('input', function() {
+                updatePreviewText();
+                applyName();
+            });
+            
+            // Sync range sliders with number inputs
+            // Font Size
+            document.getElementById('fontSizeRange').addEventListener('input', function() {
+                document.getElementById('fontSize').value = this.value;
+                applyName();
+            });
+            document.getElementById('fontSize').addEventListener('input', function() {
+                document.getElementById('fontSizeRange').value = this.value;
+                applyName();
+            });
+            
+            // Position X
+            document.getElementById('positionXRange').addEventListener('input', function() {
+                document.getElementById('positionX').value = this.value;
+                applyName();
+            });
+            document.getElementById('positionX').addEventListener('input', function() {
+                document.getElementById('positionXRange').value = this.value;
+                applyName();
+            });
+            
+            // Position Y
+            document.getElementById('positionYRange').addEventListener('input', function() {
+                document.getElementById('positionY').value = this.value;
+                applyName();
+            });
+            document.getElementById('positionY').addEventListener('input', function() {
+                document.getElementById('positionYRange').value = this.value;
+                applyName();
+            });
+            
+            // Other settings - apply immediately
+            ['fontFamily', 'textColor', 'textStyle'].forEach(id => {
+                document.getElementById(id).addEventListener('change', applyName);
+                document.getElementById(id).addEventListener('input', applyName);
+            });
+            
+            // Birth Date Position controls (for Columbia)
+            document.getElementById('birthDateFontSizeRange').addEventListener('input', function() {
+                document.getElementById('birthDateFontSize').value = this.value;
+                applyName();
+            });
+            document.getElementById('birthDateFontSize').addEventListener('input', function() {
+                document.getElementById('birthDateFontSizeRange').value = this.value;
+                applyName();
+            });
+            
+            document.getElementById('birthDateXRange').addEventListener('input', function() {
+                document.getElementById('birthDateX').value = this.value;
+                applyName();
+            });
+            document.getElementById('birthDateX').addEventListener('input', function() {
+                document.getElementById('birthDateXRange').value = this.value;
+                applyName();
+            });
+            
+            document.getElementById('birthDateYRange').addEventListener('input', function() {
+                document.getElementById('birthDateY').value = this.value;
+                applyName();
+            });
+            document.getElementById('birthDateY').addEventListener('input', function() {
+                document.getElementById('birthDateYRange').value = this.value;
+                applyName();
+            });
+        }
+        
+        function updatePreviewText() {
+            const name = document.getElementById('studentName').value.trim();
+            const previewText = document.getElementById('previewText');
+            const infoCards = document.getElementById('infoCards');
+            const doc = documents[currentDoc];
+            
+            if (name) {
+                // Update preview text based on document type
+                if (doc.noDearPrefix) {
+                    previewText.textContent = name; // Columbia: không có "Dear"
+                } else {
+                    previewText.textContent = `Dear ${name},`;
+                }
+                
+                // Parse name into first and last
+                const nameParts = name.split(' ');
+                let firstName, lastName;
+                
+                if (nameParts.length === 1) {
+                    firstName = nameParts[0];
+                    lastName = '';
+                } else if (nameParts.length === 2) {
+                    firstName = nameParts[0];
+                    lastName = nameParts[1];
+                } else {
+                    // For names like "John Michael Smith", first = "John Michael", last = "Smith"
+                    lastName = nameParts[nameParts.length - 1];
+                    firstName = nameParts.slice(0, -1).join(' ');
+                }
+                
+                // Update info cards
+                document.getElementById('firstName').textContent = firstName;
+                document.getElementById('lastName').textContent = lastName || '-';
+                
+                // Update school name based on selected document
+                document.getElementById('schoolName').textContent = documents[currentDoc].name;
+                
+                // Generate email: firstname.lastname@[domain]
+                const emailFirst = firstName.toLowerCase().replace(/\s+/g, '');
+                const emailLast = lastName.toLowerCase().replace(/\s+/g, '');
+                const domain = documents[currentDoc].emailDomain;
+                const email = emailLast ? `${emailFirst}.${emailLast}@${domain}` : `${emailFirst}@${domain}`;
+                document.getElementById('studentEmail').textContent = email;
+                
+                // Show info cards and autofill section
+                infoCards.style.display = 'grid';
+                document.getElementById('autofillSection').style.display = 'block';
+                
+                // Update country display based on selected document
+                const countryDisplay = documents[currentDoc].country || 'United States';
+                document.getElementById('countryName').textContent = countryDisplay;
+                
+                // Auto generate birth date
+                if (!currentBirthDate) {
+                    currentBirthDate = generateRandomBirthDate();
+                    document.getElementById('birthDate').textContent = 
+                        `${currentBirthDate.day}/${getEnglishMonth(currentBirthDate.month)}/${currentBirthDate.year}`;
+                    
+                    // Redraw if Columbia (to show birth date on canvas)
+                    if (doc.showBirthDate) {
+                        applyName();
+                    }
+                }
+            } else {
+                previewText.textContent = 'Dear [Student Name],';
+                infoCards.style.display = 'none';
+                document.getElementById('autofillSection').style.display = 'none';
+                currentBirthDate = null;
+            }
+        }
+        
+        function copyToClipboard(elementId, button) {
+            const text = document.getElementById(elementId).textContent;
+            
+            if (text === '-') {
+                return;
+            }
+            
+            navigator.clipboard.writeText(text).then(() => {
+                // Show copied feedback
+                const originalText = button.textContent;
+                button.textContent = '✅ Copied!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 1500);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                button.textContent = '✅ Copied!';
+                button.classList.add('copied');
+                setTimeout(() => {
+                    button.textContent = '📋 Copy';
+                    button.classList.remove('copied');
+                }, 1500);
+            });
+        }
+        
+        function applyName() {
+            if (!originalImage) {
+                return;
+            }
+            
+            const name = document.getElementById('studentName').value.trim();
+            const doc = documents[currentDoc];
+            
+            // Get settings
+            const fontFamily = document.getElementById('fontFamily').value;
+            const fontSize = document.getElementById('fontSize').value;
+            const textColor = document.getElementById('textColor').value;
+            const textStyle = document.getElementById('textStyle').value;
+            const posX = document.getElementById('positionX').value / 100;
+            const posY = document.getElementById('positionY').value / 100;
+            
+            // Redraw original image
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(originalImage, 0, 0);
+            
+            if (!name) {
+                return;
+            }
+            
+            // Prepare text - check if this document uses "Dear" prefix
+            let displayText;
+            if (doc.noDearPrefix) {
+                displayText = name; // Columbia: chỉ tên, không có "Dear"
+            } else {
+                displayText = `Dear ${name},`;
+            }
+            
+            // Set text properties
+            const fontString = `${textStyle} ${fontSize}px ${fontFamily}`;
+            ctx.font = fontString;
+            ctx.fillStyle = textColor;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            
+            // Calculate position
+            const x = canvas.width * posX;
+            const y = canvas.height * posY;
+            
+            // Draw name text
+            ctx.fillText(displayText, x, y);
+            
+            // Draw birth date for Columbia
+            if (doc.showBirthDate && currentBirthDate) {
+                const birthDateFontSize = document.getElementById('birthDateFontSize').value;
+                const birthDateX = document.getElementById('birthDateX').value / 100;
+                const birthDateY = document.getElementById('birthDateY').value / 100;
+                
+                // Format birth date as MM/DD/YYYY
+                const month = String(currentBirthDate.month).padStart(2, '0');
+                const day = String(currentBirthDate.day).padStart(2, '0');
+                const birthDateText = `${month}/${day}/${currentBirthDate.year}`;
+                
+                // Set font for birth date
+                const birthDateFont = `${textStyle} ${birthDateFontSize}px ${fontFamily}`;
+                ctx.font = birthDateFont;
+                ctx.fillStyle = textColor;
+                
+                // Calculate position
+                const bdX = canvas.width * birthDateX;
+                const bdY = canvas.height * birthDateY;
+                
+                // Draw birth date
+                ctx.fillText(birthDateText, bdX, bdY);
+            }
+            
+            // Update preview text
+            updatePreviewText();
+        }
+        
+        function downloadImage() {
+            if (!originalImage) {
+                alert('⚠️ Vui lòng upload ảnh trước!');
+                return;
+            }
+            
+            const name = document.getElementById('studentName').value.trim();
+            if (!name) {
+                alert('⚠️ Vui lòng nhập tên sinh viên!');
+                return;
+            }
+            
+            const safeName = name.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_');
+            const universityName = documents[currentDoc].name.replace(/\s+/g, '_');
+            const fileName = `${universityName}_${safeName}.png`;
+            
+            try {
+                const link = document.createElement('a');
+                link.download = fileName;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                showStatus('✅ Đã tải ảnh: ' + fileName, true);
+            } catch (e) {
+                console.error('Download error:', e);
+                // Canvas tainted - need to reload image with manual upload
+                alert('⚠️ Không thể tải ảnh do lỗi bảo mật.\n\n💡 Giải pháp: Vui lòng upload lại ảnh bằng nút "Chọn ảnh" ở trên.');
+                showUploadFallback(documents[currentDoc]);
+            }
+        }
+        
+        async function generateRandomName() {
+            const btn = document.querySelector('.btn-random');
+            const originalText = btn.textContent;
+            
+            try {
+                btn.disabled = true;
+                btn.textContent = '⏳ Loading...';
+                
+                // Use randomuser.me API to get US names
+                const response = await fetch('https://randomuser.me/api/?nat=us&inc=name');
+                const data = await response.json();
+                
+                if (data.results && data.results.length > 0) {
+                    const user = data.results[0];
+                    const fullName = `${user.name.first} ${user.name.last}`;
+                    
+                    document.getElementById('studentName').value = fullName;
+                    updatePreviewText();
+                    applyName();
+                    
+                    showStatus(`✅ Generated: ${fullName}`, true);
+                    
+                    // Auto generate script after generating name
+                    generateAutofillScript();
+                }
+            } catch (error) {
+                console.error('API Error:', error);
+                // Fallback to local random names if API fails
+                const firstNames = ['James', 'Michael', 'Robert', 'David', 'William', 'John', 'Richard', 'Joseph', 'Thomas', 'Christopher', 'Emma', 'Olivia', 'Ava', 'Isabella', 'Sophia', 'Mia', 'Charlotte', 'Amelia', 'Harper', 'Evelyn'];
+                const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Anderson', 'Taylor', 'Thomas', 'Moore', 'Jackson', 'Martin', 'Lee', 'Thompson', 'White', 'Harris'];
+                
+                const randomFirst = firstNames[Math.floor(Math.random() * firstNames.length)];
+                const randomLast = lastNames[Math.floor(Math.random() * lastNames.length)];
+                const fullName = `${randomFirst} ${randomLast}`;
+                
+                document.getElementById('studentName').value = fullName;
+                updatePreviewText();
+                applyName();
+                
+                showStatus(`✅ Generated (offline): ${fullName}`, true);
+                
+                // Auto generate script after generating name
+                generateAutofillScript();
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+        
+        function resetSettings() {
+            const doc = documents[currentDoc];
+            
+            document.getElementById('studentName').value = '';
+            document.getElementById('fontFamily').value = 'Times New Roman, serif';
+            document.getElementById('fontSize').value = doc.defaultSettings.fontSize;
+            document.getElementById('fontSizeRange').value = doc.defaultSettings.fontSize;
+            document.getElementById('textColor').value = '#000000';
+            document.getElementById('positionX').value = doc.defaultSettings.positionX;
+            document.getElementById('positionXRange').value = doc.defaultSettings.positionX;
+            document.getElementById('positionY').value = doc.defaultSettings.positionY;
+            document.getElementById('positionYRange').value = doc.defaultSettings.positionY;
+            document.getElementById('textStyle').value = 'bold';
+            
+            currentBirthDate = null;
+            generatedScript = '';
+            
+            updatePreviewText();
+            
+            if (originalImage) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(originalImage, 0, 0);
+            }
+        }
+        
+        // ============ AUTOFILL SCRIPT GENERATOR ============
+        
+        function generateRandomBirthDate() {
+            const currentYear = new Date().getFullYear();
+            const minYear = currentYear - 25;
+            const maxYear = currentYear - 18;
+            
+            const year = Math.floor(Math.random() * (maxYear - minYear + 1)) + minYear;
+            const month = Math.floor(Math.random() * 12) + 1;
+            const maxDay = new Date(year, month, 0).getDate();
+            const day = Math.floor(Math.random() * maxDay) + 1;
+            
+            return { day, month, year };
+        }
+        
+        function getEnglishMonth(monthNumber) {
+            const months = {
+                1: "January", 2: "February", 3: "March", 4: "April",
+                5: "May", 6: "June", 7: "July", 8: "August",
+                9: "September", 10: "October", 11: "November", 12: "December"
+            };
+            return months[monthNumber] || "January";
+        }
+        
+        function generateAutofillScript() {
+            const name = document.getElementById('studentName').value.trim();
+            if (!name) {
+                alert('⚠️ Vui lòng nhập tên sinh viên trước!');
+                return;
+            }
+            
+            const nameParts = name.split(' ');
+            let firstName, lastName;
+            
+            if (nameParts.length === 1) {
+                firstName = nameParts[0];
+                lastName = '';
+            } else if (nameParts.length === 2) {
+                firstName = nameParts[0];
+                lastName = nameParts[1];
+            } else {
+                lastName = nameParts[nameParts.length - 1];
+                firstName = nameParts.slice(0, -1).join(' ');
+            }
+            
+            if (!currentBirthDate) {
+                currentBirthDate = generateRandomBirthDate();
+            }
+            
+            const doc = documents[currentDoc];
+            const email = document.getElementById('studentEmail').textContent;
+            const monthName = getEnglishMonth(currentBirthDate.month);
+            
+            document.getElementById('birthDate').textContent = 
+                `${currentBirthDate.day}/${monthName}/${currentBirthDate.year}`;
+            
+            const country = doc.country || 'United States';
+            
+            generatedScript = `(async () => {
+    const CONFIG = {
+        country: "${country}",
+        schoolName: "${doc.name}",
+        firstName: "${firstName}",
+        lastName: "${lastName}",
+        birthDay: "${currentBirthDate.day}",
+        birthMonth: "${monthName}",
+        birthYear: "${currentBirthDate.year}",
+        email: "${email}",
+        targetLanguage: "English (UK)",
+        delays: { default: 400, dropdownWait: 2000, schoolWait: 2500, monthWait: 600, typing: 200, languageWait: 2000 }
+    };
+    
+    const delay = ms => new Promise(r => setTimeout(r, ms));
+    
+    // Hàm tìm input theo nhiều cách
+    const findInput = (selectors) => {
+        for (const sel of selectors) {
+            const el = document.querySelector(sel);
+            if (el) return el;
+        }
+        return null;
+    };
+    
+    // Hàm điền input
+    const fillInput = async (el, value) => {
+        if (!el) return false;
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        await delay(200);
+        el.focus();
+        await delay(100);
+        el.click();
+        await delay(100);
+        
+        // Clear existing value
+        el.value = '';
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        await delay(100);
+        
+        // Type value
+        for (const char of value) {
+            el.value += char;
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            await delay(30);
+        }
+        
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+        el.dispatchEvent(new Event('blur', { bubbles: true }));
+        await delay(CONFIG.delays.default);
+        return true;
+    };
+    
+    // Hàm click dropdown option
+    const selectOption = async (text, waitTime = 1500) => {
+        await delay(waitTime);
+        const options = document.querySelectorAll('[role="option"], [role="listbox"] li, .MuiAutocomplete-option, [data-option-index]');
+        for (const opt of options) {
+            const optText = (opt.innerText || opt.textContent || '').toLowerCase();
+            if (optText.includes(text.toLowerCase())) {
+                opt.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                await delay(200);
+                opt.click();
+                console.log("✅ Selected: " + text);
+                await delay(500);
+                return true;
+            }
+        }
+        console.log("⚠️ Option not found: " + text);
+        return false;
+    };
+    
+    console.log("🚀 Bắt đầu điền form SheerID...");
+    console.log("📋 Thông tin:", CONFIG.firstName, CONFIG.lastName, CONFIG.email);
+    
+    // === BƯỚC 1: Change Language ===
+    console.log("🌐 Bước 1: Kiểm tra ngôn ngữ...");
+    const langInput = document.querySelector('#changeLanguageSelector-input, [id*="changeLanguage"], [aria-label*="language" i]');
+    if (langInput && !langInput.value.includes('English')) {
+        langInput.click();
+        await delay(500);
+        await selectOption('English (UK)', 500);
+        await delay(CONFIG.delays.languageWait);
+    } else {
+        console.log("✅ Ngôn ngữ đã OK");
+    }
+    await delay(500);
+    
+    // === BƯỚC 2: Country ===
+    console.log("🌍 Bước 2: Điền Country...");
+    const countrySelectors = [
+        'input[id*="country" i]',
+        'input[name*="country" i]',
+        'input[placeholder*="Country" i]',
+        '[aria-label*="country" i] input',
+        '#country-input',
+        '.sid-field--country input'
+    ];
+    const countryInput = findInput(countrySelectors);
+    if (countryInput) {
+        await fillInput(countryInput, CONFIG.country);
+        await selectOption(CONFIG.country, CONFIG.delays.dropdownWait);
+    } else {
+        console.log("⚠️ Không tìm thấy Country input");
+    }
+    await delay(500);
+    
+    // === BƯỚC 3: School ===
+    console.log("🏫 Bước 3: Điền School...");
+    const schoolSelectors = [
+        'input[id*="college" i]',
+        'input[id*="school" i]',
+        'input[name*="organization" i]',
+        'input[placeholder*="School" i]',
+        'input[placeholder*="search" i]',
+        '.sid-field--organization input',
+        '[aria-label*="school" i] input'
+    ];
+    const schoolInput = findInput(schoolSelectors);
+    if (schoolInput) {
+        await fillInput(schoolInput, CONFIG.schoolName);
+        await selectOption(CONFIG.schoolName.split('(')[0].trim(), CONFIG.delays.schoolWait);
+    } else {
+        console.log("⚠️ Không tìm thấy School input");
+    }
+    await delay(500);
+    
+    // === BƯỚC 4: First Name ===
+    console.log("👤 Bước 4: Điền First Name...");
+    const firstNameSelectors = [
+        'input[id*="first" i]',
+        'input[name*="first" i]',
+        'input[placeholder*="First" i]',
+        '.sid-field--firstName input',
+        '[aria-label*="first name" i]'
+    ];
+    const firstNameInput = findInput(firstNameSelectors);
+    if (firstNameInput) {
+        await fillInput(firstNameInput, CONFIG.firstName);
+    }
+    await delay(300);
+    
+    // === BƯỚC 5: Last Name ===
+    console.log("👤 Bước 5: Điền Last Name...");
+    const lastNameSelectors = [
+        'input[id*="last" i]',
+        'input[name*="last" i]',
+        'input[placeholder*="Last" i]',
+        '.sid-field--lastName input',
+        '[aria-label*="last name" i]'
+    ];
+    const lastNameInput = findInput(lastNameSelectors);
+    if (lastNameInput) {
+        await fillInput(lastNameInput, CONFIG.lastName);
+    }
+    await delay(300);
+    
+    // === BƯỚC 6: Birth Month ===
+    console.log("📅 Bước 6: Chọn Month...");
+    const monthSelectors = [
+        'input[id*="month" i]',
+        'select[id*="month" i]',
+        '[aria-label*="month" i]',
+        '.sid-field--birthDate input[placeholder*="Month" i]',
+        '[placeholder="Month"]'
+    ];
+    const monthInput = findInput(monthSelectors);
+    if (monthInput) {
+        monthInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        await delay(200);
+        monthInput.click();
+        await delay(500);
+        await selectOption(CONFIG.birthMonth, CONFIG.delays.monthWait);
+    }
+    await delay(300);
+    
+    // === BƯỚC 7: Birth Day ===
+    console.log("📅 Bước 7: Điền Day...");
+    const daySelectors = [
+        'input[id*="day" i]',
+        'input[name*="day" i]',
+        'input[placeholder*="Day" i]',
+        '.sid-field--birthDate input[placeholder="Day"]'
+    ];
+    const dayInput = findInput(daySelectors);
+    if (dayInput) {
+        await fillInput(dayInput, CONFIG.birthDay);
+    }
+    await delay(300);
+    
+    // === BƯỚC 8: Birth Year ===
+    console.log("📅 Bước 8: Điền Year...");
+    const yearSelectors = [
+        'input[id*="year" i]',
+        'input[name*="year" i]',
+        'input[placeholder*="Year" i]',
+        '.sid-field--birthDate input[placeholder="Year"]'
+    ];
+    const yearInput = findInput(yearSelectors);
+    if (yearInput) {
+        await fillInput(yearInput, CONFIG.birthYear);
+    }
+    await delay(300);
+    
+    // === BƯỚC 9: Email ===
+    console.log("📧 Bước 9: Điền Email...");
+    const emailSelectors = [
+        'input[id*="email" i]',
+        'input[name*="email" i]',
+        'input[type="email"]',
+        'input[placeholder*="email" i]',
+        '.sid-field--email input'
+    ];
+    const emailInput = findInput(emailSelectors);
+    if (emailInput) {
+        await fillInput(emailInput, CONFIG.email);
+    }
+    await delay(500);
+    
+    console.log("═══════════════════════════════════════════");
+    console.log("✅ HOÀN THÀNH ĐIỀN FORM!");
+    console.log("👤 Họ tên: " + CONFIG.firstName + " " + CONFIG.lastName);
+    console.log("🎂 Ngày sinh: " + CONFIG.birthDay + "/" + CONFIG.birthMonth + "/" + CONFIG.birthYear);
+    console.log("📧 Email: " + CONFIG.email);
+    console.log("🏫 Trường: " + CONFIG.schoolName);
+    console.log("═══════════════════════════════════════════");
+    
+    // === Click Verify ===
+    await delay(1000);
+    console.log("🔍 Đang tìm nút Verify...");
+    const allBtns = [...document.querySelectorAll('button, [role="button"], input[type="submit"]')];
+    const verifyBtn = allBtns.find(btn => {
+        const text = (btn.innerText || btn.textContent || btn.value || '').toLowerCase();
+        return text.includes('verify') || text.includes('submit') || text.includes('xác minh');
+    });
+    
+    if (verifyBtn && !verifyBtn.disabled) {
+        verifyBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        await delay(500);
+        verifyBtn.focus();
+        await delay(200);
+        verifyBtn.click();
+        console.log("✅ Đã click nút Verify!");
+    } else {
+        console.log("⚠️ Vui lòng click thủ công nút Verify");
+    }
+})();`;
+            
+            document.getElementById('scriptSize').textContent = 
+                (new Blob([generatedScript]).size / 1024).toFixed(2) + ' KB';
+            
+            showToast('Đã tạo Script thành công!');
+        }
+        
+        function copyAutofillScript() {
+            if (!generatedScript) {
+                alert('⚠️ Vui lòng click "Tạo Script" trước!');
+                return;
+            }
+            
+            navigator.clipboard.writeText(generatedScript).then(() => {
+                const btn = document.querySelector('.btn-copy-script');
+                btn.textContent = '✅ Đã Copy!';
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.textContent = '📋 Copy Script';
+                    btn.classList.remove('copied');
+                }, 2000);
+            }).catch(() => {
+                const textArea = document.createElement('textarea');
+                textArea.value = generatedScript;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast('Script đã copy!');
+            });
+        }
+    </script>
+</body>
+</html>

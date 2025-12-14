@@ -1,0 +1,58 @@
+{
+  "manifest_version": 3,
+  "name": "SheerID Auto Fill - Student Verification",
+  "version": "1.1.0",
+  "description": "Tự động tạo thông tin sinh viên và điền form xác minh SheerID",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting",
+    "tabs",
+    "downloads"
+  ],
+  "host_permissions": [
+    "https://services.sheerid.com/*",
+    "https://nguyenbaviet.io.vn/*",
+    "https://proxy.mkvn.net/*",
+    "http://localhost:3000/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://services.sheerid.com/verify/*"],
+      "js": ["content-sheerid.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://nguyenbaviet.io.vn/*"],
+      "js": ["content-generator.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["http://localhost:3000/*"],
+      "js": ["content-generator.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://proxy.mkvn.net/*"],
+      "js": ["content-proxy.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
+
