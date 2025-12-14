@@ -1512,17 +1512,6 @@
                     
                     // Auto generate script after generating name
                     generateAutofillScript();
-                    
-                    // Auto download image after generating name
-                    if (originalImage) {
-                        setTimeout(() => {
-                            try {
-                                downloadImage();
-                            } catch (e) {
-                                console.error('Auto download failed:', e);
-                            }
-                        }, 500);
-                    }
                 }
             } catch (error) {
                 console.error('API Error:', error);
@@ -1542,17 +1531,6 @@
                 
                 // Auto generate script after generating name
                 generateAutofillScript();
-                
-                // Auto download image after generating name
-                if (originalImage) {
-                    setTimeout(() => {
-                        try {
-                            downloadImage();
-                        } catch (e) {
-                            console.error('Auto download failed:', e);
-                        }
-                    }, 500);
-                }
             } finally {
                 btn.disabled = false;
                 btn.textContent = originalText;
