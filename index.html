@@ -1725,6 +1725,7 @@
     
     // Hàm click dropdown option
     const selectOption = async (text, waitTime = 1500) => {
+        if (!text) return false;
         await delay(waitTime);
         const options = document.querySelectorAll('[role="option"], [role="listbox"] li, .MuiAutocomplete-option, [data-option-index]');
         for (const opt of options) {
@@ -1748,7 +1749,7 @@
     // === BƯỚC 1: Change Language ===
     console.log("🌐 Bước 1: Kiểm tra ngôn ngữ...");
     const langInput = document.querySelector('#changeLanguageSelector-input, [id*="changeLanguage"], [aria-label*="language" i]');
-    if (langInput && !langInput.value.includes('English')) {
+    if (langInput && !(langInput.value || '').includes('English')) {
         langInput.click();
         await delay(500);
         await selectOption('English (UK)', 500);
